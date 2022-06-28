@@ -1,5 +1,5 @@
 # lemad
-Install the R package LEMAD with
+Install the R package LEMAD from R (Rstudio) with:
 
 library(devtools)
 
