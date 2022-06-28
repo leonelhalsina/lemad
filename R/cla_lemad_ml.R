@@ -14,7 +14,7 @@
 #' @note To run in parallel it is needed to load the following libraries when windows: apTreeshape, doparallel and foreach. When unix, it requires: apTreeshape, doparallel, foreach and doMC
 #' @return List with model's loglik, number of free parameters, estimates of rates, and ancestral locations probabilities.
 #' @examples
-#'# Example of how to set the arguments for a ML search.
+#'# Example of how to set the arguments for a Maximum Likelihood search.
 #'library(lemad)
 #'library(DDD)
 #'areas <- c("A", "B", "C")

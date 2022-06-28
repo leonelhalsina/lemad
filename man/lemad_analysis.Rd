@@ -52,7 +52,7 @@ Maximum likehood search under Lineage Extinction Model of Ancestral Distribution
 To run in parallel it is needed to load the following libraries when windows: apTreeshape, doparallel and foreach. When unix, it requires: apTreeshape, doparallel, foreach and doMC
 }
 \examples{
-# Example of how to set the arguments for a ML search.
+# Example of how to set the arguments for a Maximum Likelihood search.
 library(lemad)
 library(DDD)
 areas <- c("A", "B", "C")
