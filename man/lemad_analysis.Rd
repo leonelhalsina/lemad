@@ -68,16 +68,18 @@ missing_spp_areas[[2]] <- c(0.8,0.95)
 
 output <- lemad_analysis(
 phylotree_recons,
-  species_presence,
-  areas,
-  num_max_multiregion = 3,
-  DEC_events,
-  missing_spp_areas,
-  lineage_extinction = 0.005,
-    initial_lambda = NULL,
- initial_disperextirpation = NULL,
-  run_parallel = FALSE,
-  use_fortran_code = TRUE)
+species_presence,
+areas,
+num_max_multiregion = 3,
+condition_on_origin = NULL,
+DEC_events,
+missing_spp_areas,
+lineage_extinction =  0.005,
+initial_lambda = NULL,
+initial_disperextirpation = NULL,
+run_parallel = FALSE,
+use_fortran_code = TRUE
+)
 
-output$model_ml #  -9.898528 the loglik for the model
+output$model_ml #  -9.898528 the loglikelihood for the model
 }
