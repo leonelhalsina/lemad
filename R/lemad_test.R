@@ -1,6 +1,6 @@
 
 lemad_test_geosse <- function(){
-  #geosse
+  # test geosse
   pars <- c(1.5, 0.5, 1.0, 0.7, 0.7, 2.5, 0.5)
   names(pars) <- c("sA", "sB", "sAB", "xA", "xB", "dA", "dB")
   #set.seed(5)
