@@ -2,6 +2,7 @@
 **Install** 
 
 To install the R package LEMAD, type from R (Rstudio):
+
 ```
 library(devtools)
 remotes::install_github("leonelhalsina/lemad")
