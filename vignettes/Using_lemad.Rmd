@@ -1,0 +1,145 @@
+---
+title: "Using LEMAD"
+author: "Leonel Herrera-Alsina"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{"Using LEMAD"}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Introduction
+
+Our Lineage Extinction Model of Ancestral Distribution (LEMAD) computes the likelihood of the modern distribution of species (given the parameters of the model) where lineage extinction is a fundamental part of the calculation. LEMAD generalizes the likelihood described in GeoSSE for any number of areas and under several sets of geographic assumptions that facilitate its use in Ancestral Distribution Estimation (ADE). In LEMAD, the species’ geographic distribution changes over time in a similar manner as an evolving discrete trait does in SSE models. Lineages expand and contract their geographic distribution by colonising new regions and going locally extinct from others; these processes take place along the branches of the phylogenetic tree. LEMAD assumes that rates of speciation and extinction are constant across regions. DIVA and DEC are popular methods for ADE and they differ in the set of geographic assumptions (see below); in a LEMAD framework, we can use both DIVA and DEC sets of assumptions (we call them DIVAevents and DECevents). DIVAevents assumes that widespread species can split their ranges (vicariance) in any combination regardless the number of areas where daughter lineages inhabit (e.g., a species presents in region A, B, C and D can split in AB-CD or A-BCD; widespread vicariance sensu Matzke 2013) while DECevents assumes that one of the daughter lineages will be present at a single region (e.g., ABCD species splits in A-BCD or B-ACD; narrow vicariance). For in-situ speciation and in contrast with DIVAevents, DECevents allows that widespread species have a given population diverging from the rest, becoming a different species which coexists with the parental lineage e.g., ABCD species produces ABCD and the new species is restricted to A (in-situ subset hereafter; sympatry subset sensu Matzke 2013). 
+## SecSSE input files
+It could be convenient to remove all the objects in memory and then load LEMAD:
+```{r}
+rm(list = ls())
+library(DDD)
+library(lemad)
+```
+Similar to the DIVA, DEC, BioGeoBears,LEMAD uses two input files: 1) a rooted, ultrametric tree in nexus format (for conversion of other formats to nexus, we refer to the documentation in package 'ape') and 2) a data file with geographic information. This file will have two columns, the first containing taxa names (which should match the names in the phylogeny) and the second a  code for the region where each species inhabits (usually A,B,C, etc., but notice that 'NA' is a valid code too, if you are not sure about the distribution of that species). A comma-separated value file (.csv) generated in MsExcel works particularly well. The *.csv file can be loaded into R using the read.csv() function. In this vignette, we are loading R objects (using the function data()) instead of nexus trees or csv files as it was better to handle when building this vignette document. But, we provide a line commented out on how to the file uploading should be done:
+```{r}
+# amazilia_distribution <- read.csv(file="humm_distribution.csv")
+data(distributioninfo)
+head(amazilia_distribution)
+```
+In this data set (here we see only the top lines of the data frame), hummingbird species can live in regions A, B or C or any combination of them. Note that first species is a multi-region one, and the proper way to indicate it is with "AB".  
+
+The second object we need is an ultrametric phylogenetic tree, that is rooted and has labeled tips. One can load it in R by using read.nexus(). In our example we load a prepared phylogeny named "phylo_Vign":
+```{r}
+# amazilia_tree <- read.nexus("amazilia_phylo.nex") # example of how to load a tree
+data("phylo_Vign2")
+```
+To run LEMAD it is important that tree tip labels agree with taxon names in the distribution file, but also that these are in the same order. To that end, we run the following piece of code prior to any analysis:
+```{r}
+rownames(amazilia_distribution) <- amazilia_distribution$species
+geiger:::name.check(amazilia_tree, amazilia_distribution, data.names=NULL)
+amazilia_distribution$region <- toupper(amazilia_distribution$region)
+amazilia_distribution <- amazilia_distribution[order(match(amazilia_distribution$species,amazilia_tree$tip.label)),]
+
+(amazilia_distribution$species) == (amazilia_tree$tip.label)
+
+```
+The last line should produce a vector of only TRUE which confirms our phylogenic tree and species distribution object match each other. 
+Now that our phylogenetic tree and species distribution are working fine, we declare these variables for simplicity:
+```{r}
+phylotree_recons <- amazilia_tree
+species_presence <- amazilia_distribution$region
+```
+If the letters that are coding the distribution of species is unsorted (e.g., BAC instead of ABC), we can run the following lines to solve it. 
+```{r}
+#for(ik in 1:length(species_presence)){
+#  string_to_sort <- species_presence[ik]
+#  species_presence[ik] <- paste(sort(unlist(strsplit(string_to_sort, ""))), collapse = "")
+#}
+```
+We need to specify that our analysis will have three region. We do not have to specify all the multi-region combinations.
+```{r}
+all_areas <- c("A","B","C")
+```
+Many datasets are not perfect and we have to learn to live with that. Because LEMAD considers the lineages that went extinct (i.e., missing branches) into the analysis, if our phylogenetic tree is incomplete because of sampling issues, the estimation of extinction can be off. Although LEMAD would not distinguish between missing branches due to extinction and missing branches due to sampling (e.g., it was not possible to obtain molecular information for all the extant species), we can help the analysis by specifying we are aware of sampling issues in our tree. In this example, our tree includes 80% of all the species living in region A, the 57% of species living in B and 83% of the species living in both. All species living region C are present in the tree, also all the species living in AC or BC, etc. We set the following list to set the regions that are incomplete (regions whose inhabitants are all present in the tree, do not have to be specified)
+```{r}
+missing_spp_areas <- list()
+missing_spp_areas[[1]] <- c("A","B","AB")
+missing_spp_areas[[2]] <- c(0.8,0.57,0.83)
+```
+Notice that the order of the second list object should match that of the first list object. 
+We need to set what is the maximum number of areas where a species can take at a given point in time. This means, the most widespread ancestor, could it be spread in A, B and C? or we limit that lineages can only live in two regions? In the case of this group of hummingbirds, there are few species that are indeed, present at the three regions at the present. So, it might be safe to assume that ancestors could achieve the same. In datasets with more regions, one should make a decision whether a species can be truly "cosmopolitan" or not. 
+```{r}
+num_max_multiregion <- 3
+```
+By doing that line, we are saying that lineages can be present in: 
+"A"   "B"   "C"   "AB"  "AC"  "BC"  "ABC"
+Now, let's imagine that we have four regions (A,B,C,D) and we still think that the maximum number of regions a species can simultaneously be present at is 3. This makes that all the possible distributions are: 
+"A"    "B"    "C"    "D"    "AB"   "AC"   "AD"   "BC"   "BD"   "CD"   "ABC"  "ABD"  "ACD"  "BCD"  "ABCD"
+
+Imagine we have regions A,B,C,D and E, setting the maximum number of regions to occur at the same time has a major consequence in the total number of potential distributions:
+when num_max_multiregion = 2, we get 15 different distributions
+when num_max_multiregion = 3, we get 25 different distributions
+when num_max_multiregion = 4, we get 30 different distributions
+
+LEMAD, even though precise, is sort of slow. The higher the number of potential distributions, the more equations have to be solved and the slower the analysis is. We cannot set num_max_multiregion to 1 because we need some (at least) two-region species because the model assumes there are vicariance events.
+In LEMAD we can fit models where the extinction rate is fixed to a certain figure. This means that the provided rate will be plugged into the analysis. At the end, we will get a likelihood value for such a model. When fixing the model to a different extinction rate, the likelihood could be different. By comparing both results, we will know which model is supported better. Also, we can let the extinction rate be estimated during the calculation. To do that we use the argument:
+```{r}
+#lineage_extinction <- "free"
+# or
+lineage_extinction <- 0.001
+```
+Before starting the optimization (Maximum likelihood search, which will find the combinations of rates that fit best), we can provide of "initial values". The search algorithm needs to start calculating the very first likelihood using a set of rates. From there, it will try rates that are slightly lower or higher, calculate the likelihood and check whether those likelihoods are better than the resulting one from the previous parameter combination. This makes the algorithm decide which direction to take. 
+```{r}
+initial_lambda <- c(0.01,0.01)
+initial_disperextirpation <- 0.002
+```
+Those lines are saying that we want to start the ML search where speciation is 0.01 and the rate of colonizing and disappearing from regions is 0.002. Note that the initial lambda is a vector of length 2 because we have two types of speciation: in-situ and vicariance. We need to provide a value for each type of speciation. If we do not have a better initial guess, we do both 0.01. Again, these are only starting points. If we have no clue what a sensible starting point would be, we set both arguments to NULL and LEMAD will provide a standard starting point (the lambda will come from fitting a birth-death model to the phylogenetic tree). In principle, it does not matter where we start the search, it should always converge to the same value.
+LEMAD allows fitting models under the assumptions of DIVAevents or DECevets (see Introduction). Because they are different parameterizations of the same model, the comparison of their likelihoods is valid and straightforward so data will inform which set of assumptions is more likely. We need to use the variable:
+```{r}
+DEC_events <- FALSE # to choose DIVAevents
+# or when choosing DECevents:
+# DEC_events <- TRUE 
+```
+Finally, we can incorporate information on the distribution of the common ancestor of the whole clade. So, LEMAD will compute the likelihood conditioned on the information we provided. To indicate that the very first ancestor of the clade was present in area A, We do:
+```{r}
+# condition_on_origin <- A
+```
+ Generally, we lack this information so we normally want LEMAD not to condition on a particular area. We do:
+```{r}
+condition_on_origin <- NULL
+```
+When analysing large phylogenetic trees, we might benefit of splitting the likelihood calculation into two cores of our computer (or computer cluster, highly recommended). When run_parallel = TRUE, LEMAD splits the tree into two halves, each one goes to a different core for simultaneous computation. However, some trees are not very symmetric which makes the assignment of tasks to the cores unfair. One of the cores will finish fast and has to wait for the other one. Besides, the communication across cores takes time. We recommend run_parallel only when the tree is large and has somehow a symmetric shape. It could otherwise, increase the computation time.  
+To launch the analysis:
+```{r}
+# output_vig <- lemad_analysis(
+#  phylotree_recons,
+#  species_presence,
+#  areas = all_areas,
+#  num_max_multiregion,
+#  condition_on_origin,
+#  DEC_events,
+#  missing_spp_areas = missing_spp_areas,
+#  lineage_extinction = lineage_extinction,
+#  initial_lambda = initial_lambda,
+#  initial_disperextirpation = initial_disperextirpation,
+#  run_parallel = FALSE,
+#  use_fortran_code = TRUE)
+
+```
+This vignette does not run the analysis itself (it is commented out) as it takes some minutes, but we have saved the output in an R object. I will now show what the output is like.
+```{r}
+data(output_vig)
+output_vig$model_ml
+output_vig$number_free_pars
+```
+With the information from "output model_ml" and "output number_free_pars" we can compare across models using AIC.
+We can see the rates of the model, those are the rates that maximize the likelihood.
+```{r}
+output_vig$estimated_rates
+```
+In-situ speciation is estimated to be higher than vicariance. And, extinction is fixed at 0.001 as we set it up.
+output$ancestral_states will provide the probability of each ancestor (internal node) being at each region (or combination of regions), here is the first lines of such an object:
+```{r}
+head(output_vig$ancestral_states)
+```
+Those are the probabilities for the internal nodes 67, 68 up to 72. Now, one can use a function to plot those values into the phylogenetic tree (function not provided in LEMAD yet).
+

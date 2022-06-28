@@ -1,0 +1,30 @@
+Package: lemad
+Type: Package
+Title: Lineage Extinction Model of Ancestral Distribution
+Version: 2.0.0
+Date: 2019-06-22
+License: GPL-3
+Authors@R: person("Leonel", "Herrera Alsina", email = "leonelhalsina@gmail.com", role = "cre")
+Description: Reconstructs ancestral distributions while considering lineage extinction
+Depends: R (>= 3.5.0)
+Imports: utils,
+ DDD (>= 4.0),
+ ape,
+ foreach,
+ doParallel,
+ apTreeshape,
+ phylobase,
+ geiger,
+ deSolve
+Suggests: diversitree,
+ phytools,
+ testthat,
+ testit,
+ knitr,
+ rmarkdown
+Enhances: doMC
+NeedsCompilation: yes
+Encoding: UTF-8
+LazyData: true
+VignetteBuilder: knitr
+RoxygenNote: 7.2.0
