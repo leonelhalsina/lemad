@@ -1,7 +1,7 @@
 # lemad
 **Install** 
 
-To install the R package LEMAD, type from R (Rstudio):
+To install the R package LEMAD, make sure you have devtools installed and then type from R (Rstudio):
 
 ```
 library(devtools)
