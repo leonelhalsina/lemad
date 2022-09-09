@@ -141,5 +141,5 @@ output$ancestral_states will provide the probability of each ancestor (internal 
 ```{r}
 head(output_vig$ancestral_states)
 ```
-Those are the probabilities for the internal nodes 67, 68 up to 72. Now, one can use a function to plot those values into the phylogenetic tree (function not provided in LEMAD yet).
+Those are the probabilities for the internal nodes 67, 68 up to 72. Now, one can use a function to plot those values into our phylogenetic tree (function not provided in LEMAD yet).
 
