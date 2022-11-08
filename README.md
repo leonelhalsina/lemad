@@ -19,6 +19,7 @@ be called once you load the library:
 
 ```
 library(lemad)
+devtools::install(build_vignettes = TRUE)
 browseVignettes("lemad")
 ```
 ### News
