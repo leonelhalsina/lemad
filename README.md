@@ -21,6 +21,10 @@ be called once you load the library:
 library(lemad)
 browseVignettes("lemad")
 ```
+### News
+
+1- On November 8th we have released a version where c++ code (from Thijs Janzen, University of Groningen) is used to reduce computation time. It is a shame that we could not include this nice feature at the time of publishing the paper three months ago. In the paper we mentioned that a 66-species tree and 3 areas (which means it is total of 7 areas because all combinations) takes 10 minutes to complete analysis. With this c++ improvement, that time is shorted. It now takes 5 seconds.
+
 
 ### Cite
 
