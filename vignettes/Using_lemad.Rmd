@@ -107,27 +107,23 @@ Finally, we can incorporate information on the distribution of the common ancest
 ```{r}
 condition_on_origin <- NULL
 ```
-When analysing large phylogenetic trees, we might benefit of splitting the likelihood calculation into two cores of our computer (or computer cluster, highly recommended). When run_parallel = TRUE, LEMAD splits the tree into two halves, each one goes to a different core for simultaneous computation. However, some trees are not very symmetric which makes the assignment of tasks to the cores unfair. One of the cores will finish fast and has to wait for the other one. Besides, the communication across cores takes time. We recommend run_parallel only when the tree is large and has somehow a symmetric shape. It could otherwise, increase the computation time.  
 To launch the analysis:
 ```{r}
-# output_vig <- lemad_analysis(
-#  phylotree_recons,
-#  species_presence,
-#  areas = all_areas,
-#  num_max_multiregion,
-#  condition_on_origin,
-#  DEC_events,
-#  missing_spp_areas = missing_spp_areas,
-#  lineage_extinction = lineage_extinction,
-#  initial_lambda = initial_lambda,
-#  initial_disperextirpation = initial_disperextirpation,
-#  run_parallel = FALSE,
-#  use_fortran_code = TRUE)
+output_vig <- lemad_analysis(
+ phylotree_recons,
+ species_presence,
+ areas = all_areas,
+ num_max_multiregion,
+ condition_on_origin,
+ DEC_events,
+ missing_spp_areas = missing_spp_areas,
+ lineage_extinction = lineage_extinction,
+ initial_lambda = initial_lambda,
+ initial_disperextirpation = initial_disperextirpation)
 
 ```
-This vignette does not run the analysis itself (it is commented out) as it takes some minutes, but we have saved the output in an R object. I will now show what the output is like.
+This vignette does run the analysis itself. You will see all the loglik values that are tried out during the optimization. That is what you normally see in your console when running an analysis. I will now show what the output is like.
 ```{r}
-data(output_vig)
 output_vig$model_ml
 output_vig$number_free_pars
 ```

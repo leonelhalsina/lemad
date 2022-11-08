@@ -63,23 +63,20 @@ DEC_events <- FALSE # to choose DIVAevents
 condition_on_origin <- NULL
 
 ## -----------------------------------------------------------------------------
-# output_vig <- lemad_analysis(
-#  phylotree_recons,
-#  species_presence,
-#  areas = all_areas,
-#  num_max_multiregion,
-#  condition_on_origin,
-#  DEC_events,
-#  missing_spp_areas = missing_spp_areas,
-#  lineage_extinction = lineage_extinction,
-#  initial_lambda = initial_lambda,
-#  initial_disperextirpation = initial_disperextirpation,
-#  run_parallel = FALSE,
-#  use_fortran_code = TRUE)
+output_vig <- lemad_analysis(
+ phylotree_recons,
+ species_presence,
+ areas = all_areas,
+ num_max_multiregion,
+ condition_on_origin,
+ DEC_events,
+ missing_spp_areas = missing_spp_areas,
+ lineage_extinction = lineage_extinction,
+ initial_lambda = initial_lambda,
+ initial_disperextirpation = initial_disperextirpation)
 
 
 ## -----------------------------------------------------------------------------
-data(output_vig)
 output_vig$model_ml
 output_vig$number_free_pars
 
