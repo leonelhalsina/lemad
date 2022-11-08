@@ -68,11 +68,19 @@ lemad_test_geosse <- function(){
   
   lemad_LL <- cla_lemad_loglik(parameter, phy,  traits_coded_letters,
                                num_max_multiregion = 2,
-                             use_fortran = TRUE, methode = "ode45", cond = "maddison_cond",
-                             root_state_weight = "maddison_weights", sampling_fraction = c(1,1,1),
-                             run_parallel = FALSE, setting_calculation = NULL,
-                             setting_parallel = NULL, see_ancestral_states = TRUE,
-                             loglik_penalty = 0)
+                             cond = "proper_cond",
+                             root_state_weight = "proper_weights",
+                             sampling_fraction,
+                             setting_calculation = NULL,
+                             see_ancestral_states = FALSE,
+                             loglik_penalty = 0,
+                             is_complete_tree = FALSE,
+                             num_threads = 1,
+                             method = ifelse(num_threads == 1,
+                                             "odeint::bulirsch_stoer",
+                                             "odeint::runge_kutta_fehlberg78"),
+                             atol = 1e-16,
+                             rtol = 1e-16)
   
   
   testthat::expect_equal(classe_diversitree_LL,lemad_LL$LL)

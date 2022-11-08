@@ -10,21 +10,22 @@ Depends: R (>= 3.5.0)
 Imports: utils,
  DDD (>= 4.0),
  ape,
- foreach,
- doParallel,
  apTreeshape,
- phylobase,
- geiger,
- deSolve
+  geiger,
+   Rcpp,
+ RcppParallel
 Suggests: diversitree,
  phytools,
  testthat,
  testit,
  knitr,
  rmarkdown
-Enhances: doMC
 NeedsCompilation: yes
 Encoding: UTF-8
 LazyData: true
 VignetteBuilder: knitr
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.1
+LinkingTo: 
+    Rcpp,
+    RcppParallel,
+    BH

@@ -14,9 +14,7 @@ lemad_analysis(
   missing_spp_areas,
   lineage_extinction = "free",
   initial_lambda = NULL,
-  initial_disperextirpation = NULL,
-  run_parallel = FALSE,
-  use_fortran_code = TRUE
+  initial_disperextirpation = NULL
 )
 }
 \arguments{
@@ -39,17 +37,12 @@ lemad_analysis(
 \item{initial_lambda}{Vector of length 2 for initial in-situ and vicariance rates to start the ML search. If NULL, the starting lambda will be taken from a Birth-death process.}
 
 \item{initial_disperextirpation}{Intial values for dispersal-local extinction during the ML search. If NULL, it will be equal to lambda/5.}
-
-\item{run_parallel}{TRUE or FALSE. We recommend parallel computation only when the phylogeny is large. It will use three computing cores. See note.}
 }
 \value{
 List with model's loglik, number of free parameters, estimates of rates, and ancestral locations probabilities.
 }
 \description{
 Maximum likehood search under Lineage Extinction Model of Ancestral Distribution (LEMAD)
-}
-\note{
-To run in parallel it is needed to load the following libraries when windows: apTreeshape, doparallel and foreach. When unix, it requires: apTreeshape, doparallel, foreach and doMC
 }
 \examples{
 # Example of how to set the arguments for a Maximum Likelihood search.
@@ -76,10 +69,8 @@ DEC_events,
 missing_spp_areas,
 lineage_extinction =  0.005,
 initial_lambda = NULL,
-initial_disperextirpation = NULL,
-run_parallel = FALSE,
-use_fortran_code = TRUE
+initial_disperextirpation = NULL
 )
 
-output$model_ml #  -9.898528 the loglikelihood for the model
+output$model_ml #  -9.893469 the loglikelihood for the model
 }

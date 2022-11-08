@@ -12,27 +12,57 @@
 
 <meta name="author" content="Leonel Herrera-Alsina" />
 
-<meta name="date" content="2021-09-15" />
+<meta name="date" content="2022-11-08" />
 
 <title>Using LEMAD</title>
 
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 
-<style type="text/css">code{white-space: pre;}</style>
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
 <style type="text/css" data-origin="pandoc">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -52,7 +82,7 @@ pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-le
 div.sourceCode
   {   }
 @media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
@@ -106,6 +136,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   }
 })();
 </script>
+
 
 
 
@@ -303,21 +334,66 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Using LEMAD</h1>
 <h4 class="author">Leonel Herrera-Alsina</h4>
-<h4 class="date">2021-09-15</h4>
+<h4 class="date">2022-11-08</h4>
 
 
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>Our Lineage Extinction Model of Ancestral Distribution (LEMAD) computes the likelihood of the modern distribution of species (given the parameters of the model) where lineage extinction is a fundamental part of the calculation. LEMAD generalizes the likelihood described in GeoSSE for any number of areas and under several sets of geographic assumptions that facilitate its use in Ancestral Distribution Estimation (ADE). In LEMAD, the species’ geographic distribution changes over time in a similar manner as an evolving discrete trait does in SSE models. Lineages expand and contract their geographic distribution by colonising new regions and going locally extinct from others; these processes take place along the branches of the phylogenetic tree. LEMAD assumes that rates of speciation and extinction are constant across regions. DIVA and DEC are popular methods for ADE and they differ in the set of geographic assumptions (see below); in a LEMAD framework, we can use both DIVA and DEC sets of assumptions (we call them DIVAevents and DECevents). DIVAevents assumes that widespread species can split their ranges (vicariance) in any combination regardless the number of areas where daughter lineages inhabit (e.g., a species presents in region A, B, C and D can split in AB-CD or A-BCD; widespread vicariance sensu Matzke 2013) while DECevents assumes that one of the daughter lineages will be present at a single region (e.g., ABCD species splits in A-BCD or B-ACD; narrow vicariance). For in-situ speciation and in contrast with DIVAevents, DECevents allows that widespread species have a given population diverging from the rest, becoming a different species which coexists with the parental lineage e.g., ABCD species produces ABCD and the new species is restricted to A (in-situ subset hereafter; sympatry subset sensu Matzke 2013). ## SecSSE input files It could be convenient to remove all the objects in memory and then load LEMAD:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">rm</span>(<span class="dt">list =</span> <span class="kw">ls</span>())</span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="kw">library</span>(DDD)</span></code></pre></div>
-<pre><code>## Warning: package &#39;DDD&#39; was built under R version 3.6.3</code></pre>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">library</span>(lemad)</span></code></pre></div>
-<p>Similar to the DIVA, DEC, BioGeoBears,LEMAD uses two input files: 1) a rooted, ultrametric tree in nexus format (for conversion of other formats to nexus, we refer to the documentation in package ‘ape’) and 2) a data file with geographic information. This file will have two columns, the first containing taxa names (which should match the names in the phylogeny) and the second a code for the region where each species inhabits (usually A,B,C, etc., but notice that ‘NA’ is a valid code too, if you are not sure about the distribution of that species). A comma-separated value file (.csv) generated in MsExcel works particularly well. The *.csv file can be loaded into R using the read.csv() function. In this vignette, we are loading R objects (using the function data()) instead of nexus trees or csv files as it was better to handle when building this vignette document. But, we provide a line commented out on how to the file uploading should be done:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># amazilia_distribution &lt;- read.csv(file=&quot;humm_distribution.csv&quot;)</span></span>
-<span id="cb4-2"><a href="#cb4-2"></a><span class="kw">data</span>(distributioninfo)</span>
-<span id="cb4-3"><a href="#cb4-3"></a><span class="kw">head</span>(amazilia_distribution)</span></code></pre></div>
+<p>Our Lineage Extinction Model of Ancestral Distribution (LEMAD)
+computes the likelihood of the modern distribution of species (given the
+parameters of the model) where lineage extinction is a fundamental part
+of the calculation. LEMAD generalizes the likelihood described in GeoSSE
+for any number of areas and under several sets of geographic assumptions
+that facilitate its use in Ancestral Distribution Estimation (ADE). In
+LEMAD, the species’ geographic distribution changes over time in a
+similar manner as an evolving discrete trait does in SSE models.
+Lineages expand and contract their geographic distribution by colonising
+new regions and going locally extinct from others; these processes take
+place along the branches of the phylogenetic tree. LEMAD assumes that
+rates of speciation and extinction are constant across regions. DIVA and
+DEC are popular methods for ADE and they differ in the set of geographic
+assumptions (see below); in a LEMAD framework, we can use both DIVA and
+DEC sets of assumptions (we call them DIVAevents and DECevents).
+DIVAevents assumes that widespread species can split their ranges
+(vicariance) in any combination regardless the number of areas where
+daughter lineages inhabit (e.g., a species presents in region A, B, C
+and D can split in AB-CD or A-BCD; widespread vicariance sensu Matzke
+2013) while DECevents assumes that one of the daughter lineages will be
+present at a single region (e.g., ABCD species splits in A-BCD or B-ACD;
+narrow vicariance). For in-situ speciation and in contrast with
+DIVAevents, DECevents allows that widespread species have a given
+population diverging from the rest, becoming a different species which
+coexists with the parental lineage e.g., ABCD species produces ABCD and
+the new species is restricted to A (in-situ subset hereafter; sympatry
+subset sensu Matzke 2013). ## SecSSE input files It could be convenient
+to remove all the objects in memory and then load LEMAD:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>())</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DDD)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lemad)</span></code></pre></div>
+<pre><code>## 
+## Attaching package: &#39;lemad&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:lemad2&#39;:
+## 
+##     give_me_states_combination, lemad_analysis, lemad_prepare_q_matrix,
+##     lemad_sort_the_traits, prepare_full_lambdas_vicariance</code></pre>
+<p>Similar to the DIVA, DEC, BioGeoBears,LEMAD uses two input files: 1)
+a rooted, ultrametric tree in nexus format (for conversion of other
+formats to nexus, we refer to the documentation in package ‘ape’) and 2)
+a data file with geographic information. This file will have two
+columns, the first containing taxa names (which should match the names
+in the phylogeny) and the second a code for the region where each
+species inhabits (usually A,B,C, etc., but notice that ‘NA’ is a valid
+code too, if you are not sure about the distribution of that species). A
+comma-separated value file (.csv) generated in MsExcel works
+particularly well. The *.csv file can be loaded into R using the
+read.csv() function. In this vignette, we are loading R objects (using
+the function data()) instead of nexus trees or csv files as it was
+better to handle when building this vignette document. But, we provide a
+line commented out on how to the file uploading should be done:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># amazilia_distribution &lt;- read.csv(file=&quot;humm_distribution.csv&quot;)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(distributioninfo)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(amazilia_distribution)</span></code></pre></div>
 <pre><code>##                 species region
 ## 1     Amazilia_amabilis     AB
 ## 2     Amazilia_amazilia      A
@@ -325,83 +401,185 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 ## 4      Amazilia_candida     BC
 ## 5 Amazilia_chionogaster      A
 ## 6 Amazilia_chionopectus      A</code></pre>
-<p>In this data set (here we see only the top lines of the data frame), hummingbird species can live in regions A, B or C or any combination of them. Note that first species is a multi-region one, and the proper way to indicate it is with “AB”.</p>
-<p>The second object we need is an ultrametric phylogenetic tree, that is rooted and has labeled tips. One can load it in R by using read.nexus(). In our example we load a prepared phylogeny named “phylo_Vign”:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="co"># amazilia_tree &lt;- read.nexus(&quot;amazilia_phylo.nex&quot;) # example of how to load a tree</span></span>
-<span id="cb6-2"><a href="#cb6-2"></a><span class="kw">data</span>(<span class="st">&quot;phylo_Vign2&quot;</span>)</span></code></pre></div>
-<p>To run LEMAD it is important that tree tip labels agree with taxon names in the distribution file, but also that these are in the same order. To that end, we run the following piece of code prior to any analysis:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">rownames</span>(amazilia_distribution) &lt;-<span class="st"> </span>amazilia_distribution<span class="op">$</span>species</span>
-<span id="cb7-2"><a href="#cb7-2"></a>geiger<span class="op">:::</span><span class="kw">name.check</span>(amazilia_tree, amazilia_distribution, <span class="dt">data.names=</span><span class="ot">NULL</span>)</span></code></pre></div>
+<p>In this data set (here we see only the top lines of the data frame),
+hummingbird species can live in regions A, B or C or any combination of
+them. Note that first species is a multi-region one, and the proper way
+to indicate it is with “AB”.</p>
+<p>The second object we need is an ultrametric phylogenetic tree, that
+is rooted and has labeled tips. One can load it in R by using
+read.nexus(). In our example we load a prepared phylogeny named
+“phylo_Vign”:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># amazilia_tree &lt;- read.nexus(&quot;amazilia_phylo.nex&quot;) # example of how to load a tree</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;phylo_Vign2&quot;</span>)</span></code></pre></div>
+<p>To run LEMAD it is important that tree tip labels agree with taxon
+names in the distribution file, but also that these are in the same
+order. To that end, we run the following piece of code prior to any
+analysis:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(amazilia_distribution) <span class="ot">&lt;-</span> amazilia_distribution<span class="sc">$</span>species</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>geiger<span class="sc">:::</span><span class="fu">name.check</span>(amazilia_tree, amazilia_distribution, <span class="at">data.names=</span><span class="cn">NULL</span>)</span></code></pre></div>
 <pre><code>## [1] &quot;OK&quot;</code></pre>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>amazilia_distribution<span class="op">$</span>region &lt;-<span class="st"> </span><span class="kw">toupper</span>(amazilia_distribution<span class="op">$</span>region)</span>
-<span id="cb9-2"><a href="#cb9-2"></a>amazilia_distribution &lt;-<span class="st"> </span>amazilia_distribution[<span class="kw">order</span>(<span class="kw">match</span>(amazilia_distribution<span class="op">$</span>species,amazilia_tree<span class="op">$</span>tip.label)),]</span>
-<span id="cb9-3"><a href="#cb9-3"></a></span>
-<span id="cb9-4"><a href="#cb9-4"></a>(amazilia_distribution<span class="op">$</span>species) <span class="op">==</span><span class="st"> </span>(amazilia_tree<span class="op">$</span>tip.label)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>amazilia_distribution<span class="sc">$</span>region <span class="ot">&lt;-</span> <span class="fu">toupper</span>(amazilia_distribution<span class="sc">$</span>region)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>amazilia_distribution <span class="ot">&lt;-</span> amazilia_distribution[<span class="fu">order</span>(<span class="fu">match</span>(amazilia_distribution<span class="sc">$</span>species,amazilia_tree<span class="sc">$</span>tip.label)),]</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>(amazilia_distribution<span class="sc">$</span>species) <span class="sc">==</span> (amazilia_tree<span class="sc">$</span>tip.label)</span></code></pre></div>
 <pre><code>##  [1] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
 ## [16] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
 ## [31] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
 ## [46] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
 ## [61] TRUE TRUE TRUE TRUE TRUE TRUE</code></pre>
-<p>The last line should produce a vector of only TRUE which confirms our phylogenic tree and species distribution object match each other. Now that our phylogenetic tree and species distribution are working fine, we declare these variables for simplicity:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>phylotree_recons &lt;-<span class="st"> </span>amazilia_tree</span>
-<span id="cb11-2"><a href="#cb11-2"></a>species_presence &lt;-<span class="st"> </span>amazilia_distribution<span class="op">$</span>region</span></code></pre></div>
-<p>If the letters that are coding the distribution of species is unsorted (e.g., BAC instead of ABC), we can run the following lines to solve it.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a><span class="co">#for(ik in 1:length(species_presence)){</span></span>
-<span id="cb12-2"><a href="#cb12-2"></a><span class="co">#  string_to_sort &lt;- species_presence[ik]</span></span>
-<span id="cb12-3"><a href="#cb12-3"></a><span class="co">#  species_presence[ik] &lt;- paste(sort(unlist(strsplit(string_to_sort, &quot;&quot;))), collapse = &quot;&quot;)</span></span>
-<span id="cb12-4"><a href="#cb12-4"></a><span class="co">#}</span></span></code></pre></div>
-<p>We need to specify that our analysis will have three region. We do not have to specify all the multi-region combinations.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>all_areas &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;A&quot;</span>,<span class="st">&quot;B&quot;</span>,<span class="st">&quot;C&quot;</span>)</span></code></pre></div>
-<p>Many datasets are not perfect and we have to learn to live with that. Because LEMAD considers the lineages that went extinct (i.e., missing branches) into the analysis, if our phylogenetic tree is incomplete because of sampling issues, the estimation of extinction can be off. Although LEMAD would not distinguish between missing branches due to extinction and missing branches due to sampling (e.g., it was not possible to obtain molecular information for all the extant species), we can help the analysis by specifying we are aware of sampling issues in our tree. In this example, our tree includes 80% of all the species living in region A, the 57% of species living in B and 83% of the species living in both. All species living region C are present in the tree, also all the species living in AC or BC, etc. We set the following list to set the regions that are incomplete (regions whose inhabitants are all present in the tree, do not have to be specified)</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>missing_spp_areas &lt;-<span class="st"> </span><span class="kw">list</span>()</span>
-<span id="cb14-2"><a href="#cb14-2"></a>missing_spp_areas[[<span class="dv">1</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;A&quot;</span>,<span class="st">&quot;B&quot;</span>,<span class="st">&quot;AB&quot;</span>)</span>
-<span id="cb14-3"><a href="#cb14-3"></a>missing_spp_areas[[<span class="dv">2</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="fl">0.8</span>,<span class="fl">0.57</span>,<span class="fl">0.83</span>)</span></code></pre></div>
-<p>Notice that the order of the second list object should match that of the first list object. We need to set what is the maximum number of areas where a species can take at a given point in time. This means, the most widespread ancestor, could it be spread in A, B and C? or we limit that lineages can only live in two regions? In the case of this group of hummingbirds, there are few species that are indeed, present at the three regions at the present. So, it might be safe to assume that ancestors could achieve the same. In datasets with more regions, one should make a decision whether a species can be truly “cosmopolitan” or not.</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>num_max_multiregion &lt;-<span class="st"> </span><span class="dv">3</span></span></code></pre></div>
-<p>By doing that line, we are saying that lineages can be present in: “A” “B” “C” “AB” “AC” “BC” “ABC” Now, let’s imagine that we have four regions (A,B,C,D) and we still think that the maximum number of regions a species can simultaneously be present at is 3. This makes that all the possible distributions are: “A” “B” “C” “D” “AB” “AC” “AD” “BC” “BD” “CD” “ABC” “ABD” “ACD” “BCD” “ABCD”</p>
-<p>Imagine we have regions A,B,C,D and E, setting the maximum number of regions to occur at the same time has a major consequence in the total number of potential distributions: when num_max_multiregion = 2, we get 15 different distributions when num_max_multiregion = 3, we get 25 different distributions when num_max_multiregion = 4, we get 30 different distributions</p>
-<p>LEMAD, even though precise, is sort of slow. The higher the number of potential distributions, the more equations have to be solved and the slower the analysis is. We cannot set num_max_multiregion to 1 because we need some (at least) two-region species because the model assumes there are vicariance events. In LEMAD we can fit models where the extinction rate is fixed to a certain figure. This means that the provided rate will be plugged into the analysis. At the end, we will get a likelihood value for such a model. When fixing the model to a different extinction rate, the likelihood could be different. By comparing both results, we will know which model is supported better. Also, we can let the extinction rate be estimated during the calculation. To do that we use the argument:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a><span class="co">#lineage_extinction &lt;- &quot;free&quot;</span></span>
-<span id="cb16-2"><a href="#cb16-2"></a><span class="co"># or</span></span>
-<span id="cb16-3"><a href="#cb16-3"></a>lineage_extinction &lt;-<span class="st"> </span><span class="fl">0.001</span></span></code></pre></div>
-<p>Before starting the optimization (Maximum likelihood search, which will find the combinations of rates that fit best), we can provide of “initial values”. The search algorithm needs to start calculating the very first likelihood using a set of rates. From there, it will try rates that are slightly lower or higher, calculate the likelihood and check whether those likelihoods are better than the resulting one from the previous parameter combination. This makes the algorithm decide which direction to take.</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>initial_lambda &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="fl">0.01</span>,<span class="fl">0.01</span>)</span>
-<span id="cb17-2"><a href="#cb17-2"></a>initial_disperextirpation &lt;-<span class="st"> </span><span class="fl">0.002</span></span></code></pre></div>
-<p>Those lines are saying that we want to start the ML search where speciation is 0.01 and the rate of colonizing and disappearing from regions is 0.002. Note that the initial lambda is a vector of length 2 because we have two types of speciation: in-situ and vicariance. We need to provide a value for each type of speciation. If we do not have a better initial guess, we do both 0.01. Again, these are only starting points. If we have no clue what a sensible starting point would be, we set both arguments to NULL and LEMAD will provide a standard starting point (the lambda will come from fitting a birth-death model to the phylogenetic tree). In principle, it does not matter where we start the search, it should always converge to the same value. LEMAD allows fitting models under the assumptions of DIVAevents or DECevets (see Introduction). Because they are different parameterizations of the same model, the comparison of their likelihoods is valid and straightforward so data will inform which set of assumptions is more likely. We need to use the variable:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a>DEC_events &lt;-<span class="st"> </span><span class="ot">FALSE</span> <span class="co"># to choose DIVAevents</span></span>
-<span id="cb18-2"><a href="#cb18-2"></a><span class="co"># or when choosing DECevents:</span></span>
-<span id="cb18-3"><a href="#cb18-3"></a><span class="co"># DEC_events &lt;- TRUE </span></span></code></pre></div>
-<p>Finally, we can incorporate information on the distribution of the common ancestor of the whole clade. So, LEMAD will compute the likelihood conditioned on the information we provided. To indicate that the very first ancestor of the clade was present in area A, We do:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a><span class="co"># condition_on_origin &lt;- A</span></span></code></pre></div>
-<p>Generally, we lack this information so we normally want LEMAD not to condition on a particular area. We do:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a>condition_on_origin &lt;-<span class="st"> </span><span class="ot">NULL</span></span></code></pre></div>
-<p>When analysing large phylogenetic trees, we might benefit of splitting the likelihood calculation into two cores of our computer (or computer cluster, highly recommended). When run_parallel = TRUE, LEMAD splits the tree into two halves, each one goes to a different core for simultaneous computation. However, some trees are not very symmetric which makes the assignment of tasks to the cores unfair. One of the cores will finish fast and has to wait for the other one. Besides, the communication across cores takes time. We recommend run_parallel only when the tree is large and has somehow a symmetric shape. It could otherwise, increase the computation time.<br />
+<p>The last line should produce a vector of only TRUE which confirms our
+phylogenic tree and species distribution object match each other. Now
+that our phylogenetic tree and species distribution are working fine, we
+declare these variables for simplicity:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>phylotree_recons <span class="ot">&lt;-</span> amazilia_tree</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>species_presence <span class="ot">&lt;-</span> amazilia_distribution<span class="sc">$</span>region</span></code></pre></div>
+<p>If the letters that are coding the distribution of species is
+unsorted (e.g., BAC instead of ABC), we can run the following lines to
+solve it.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#for(ik in 1:length(species_presence)){</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co">#  string_to_sort &lt;- species_presence[ik]</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">#  species_presence[ik] &lt;- paste(sort(unlist(strsplit(string_to_sort, &quot;&quot;))), collapse = &quot;&quot;)</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co">#}</span></span></code></pre></div>
+<p>We need to specify that our analysis will have three region. We do
+not have to specify all the multi-region combinations.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>all_areas <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;A&quot;</span>,<span class="st">&quot;B&quot;</span>,<span class="st">&quot;C&quot;</span>)</span></code></pre></div>
+<p>Many datasets are not perfect and we have to learn to live with that.
+Because LEMAD considers the lineages that went extinct (i.e., missing
+branches) into the analysis, if our phylogenetic tree is incomplete
+because of sampling issues, the estimation of extinction can be off.
+Although LEMAD would not distinguish between missing branches due to
+extinction and missing branches due to sampling (e.g., it was not
+possible to obtain molecular information for all the extant species), we
+can help the analysis by specifying we are aware of sampling issues in
+our tree. In this example, our tree includes 80% of all the species
+living in region A, the 57% of species living in B and 83% of the
+species living in both. All species living region C are present in the
+tree, also all the species living in AC or BC, etc. We set the following
+list to set the regions that are incomplete (regions whose inhabitants
+are all present in the tree, do not have to be specified)</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>missing_spp_areas <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>missing_spp_areas[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;A&quot;</span>,<span class="st">&quot;B&quot;</span>,<span class="st">&quot;AB&quot;</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>missing_spp_areas[[<span class="dv">2</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.8</span>,<span class="fl">0.57</span>,<span class="fl">0.83</span>)</span></code></pre></div>
+<p>Notice that the order of the second list object should match that of
+the first list object. We need to set what is the maximum number of
+areas where a species can take at a given point in time. This means, the
+most widespread ancestor, could it be spread in A, B and C? or we limit
+that lineages can only live in two regions? In the case of this group of
+hummingbirds, there are few species that are indeed, present at the
+three regions at the present. So, it might be safe to assume that
+ancestors could achieve the same. In datasets with more regions, one
+should make a decision whether a species can be truly “cosmopolitan” or
+not.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>num_max_multiregion <span class="ot">&lt;-</span> <span class="dv">3</span></span></code></pre></div>
+<p>By doing that line, we are saying that lineages can be present in:
+“A” “B” “C” “AB” “AC” “BC” “ABC” Now, let’s imagine that we have four
+regions (A,B,C,D) and we still think that the maximum number of regions
+a species can simultaneously be present at is 3. This makes that all the
+possible distributions are: “A” “B” “C” “D” “AB” “AC” “AD” “BC” “BD”
+“CD” “ABC” “ABD” “ACD” “BCD” “ABCD”</p>
+<p>Imagine we have regions A,B,C,D and E, setting the maximum number of
+regions to occur at the same time has a major consequence in the total
+number of potential distributions: when num_max_multiregion = 2, we get
+15 different distributions when num_max_multiregion = 3, we get 25
+different distributions when num_max_multiregion = 4, we get 30
+different distributions</p>
+<p>LEMAD, even though precise, is sort of slow. The higher the number of
+potential distributions, the more equations have to be solved and the
+slower the analysis is. We cannot set num_max_multiregion to 1 because
+we need some (at least) two-region species because the model assumes
+there are vicariance events. In LEMAD we can fit models where the
+extinction rate is fixed to a certain figure. This means that the
+provided rate will be plugged into the analysis. At the end, we will get
+a likelihood value for such a model. When fixing the model to a
+different extinction rate, the likelihood could be different. By
+comparing both results, we will know which model is supported better.
+Also, we can let the extinction rate be estimated during the
+calculation. To do that we use the argument:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#lineage_extinction &lt;- &quot;free&quot;</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>lineage_extinction <span class="ot">&lt;-</span> <span class="fl">0.001</span></span></code></pre></div>
+<p>Before starting the optimization (Maximum likelihood search, which
+will find the combinations of rates that fit best), we can provide of
+“initial values”. The search algorithm needs to start calculating the
+very first likelihood using a set of rates. From there, it will try
+rates that are slightly lower or higher, calculate the likelihood and
+check whether those likelihoods are better than the resulting one from
+the previous parameter combination. This makes the algorithm decide
+which direction to take.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>initial_lambda <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.01</span>,<span class="fl">0.01</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>initial_disperextirpation <span class="ot">&lt;-</span> <span class="fl">0.002</span></span></code></pre></div>
+<p>Those lines are saying that we want to start the ML search where
+speciation is 0.01 and the rate of colonizing and disappearing from
+regions is 0.002. Note that the initial lambda is a vector of length 2
+because we have two types of speciation: in-situ and vicariance. We need
+to provide a value for each type of speciation. If we do not have a
+better initial guess, we do both 0.01. Again, these are only starting
+points. If we have no clue what a sensible starting point would be, we
+set both arguments to NULL and LEMAD will provide a standard starting
+point (the lambda will come from fitting a birth-death model to the
+phylogenetic tree). In principle, it does not matter where we start the
+search, it should always converge to the same value. LEMAD allows
+fitting models under the assumptions of DIVAevents or DECevets (see
+Introduction). Because they are different parameterizations of the same
+model, the comparison of their likelihoods is valid and straightforward
+so data will inform which set of assumptions is more likely. We need to
+use the variable:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>DEC_events <span class="ot">&lt;-</span> <span class="cn">FALSE</span> <span class="co"># to choose DIVAevents</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="co"># or when choosing DECevents:</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co"># DEC_events &lt;- TRUE </span></span></code></pre></div>
+<p>Finally, we can incorporate information on the distribution of the
+common ancestor of the whole clade. So, LEMAD will compute the
+likelihood conditioned on the information we provided. To indicate that
+the very first ancestor of the clade was present in area A, We do:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># condition_on_origin &lt;- A</span></span></code></pre></div>
+<p>Generally, we lack this information so we normally want LEMAD not to
+condition on a particular area. We do:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>condition_on_origin <span class="ot">&lt;-</span> <span class="cn">NULL</span></span></code></pre></div>
+<p>When analysing large phylogenetic trees, we might benefit of
+splitting the likelihood calculation into two cores of our computer (or
+computer cluster, highly recommended). When run_parallel = TRUE, LEMAD
+splits the tree into two halves, each one goes to a different core for
+simultaneous computation. However, some trees are not very symmetric
+which makes the assignment of tasks to the cores unfair. One of the
+cores will finish fast and has to wait for the other one. Besides, the
+communication across cores takes time. We recommend run_parallel only
+when the tree is large and has somehow a symmetric shape. It could
+otherwise, increase the computation time.<br />
 To launch the analysis:</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a><span class="co"># output_vig &lt;- lemad_analysis(</span></span>
-<span id="cb21-2"><a href="#cb21-2"></a><span class="co">#  phylotree_recons,</span></span>
-<span id="cb21-3"><a href="#cb21-3"></a><span class="co">#  species_presence,</span></span>
-<span id="cb21-4"><a href="#cb21-4"></a><span class="co">#  areas = all_areas,</span></span>
-<span id="cb21-5"><a href="#cb21-5"></a><span class="co">#  num_max_multiregion,</span></span>
-<span id="cb21-6"><a href="#cb21-6"></a><span class="co">#  condition_on_origin,</span></span>
-<span id="cb21-7"><a href="#cb21-7"></a><span class="co">#  DEC_events,</span></span>
-<span id="cb21-8"><a href="#cb21-8"></a><span class="co">#  missing_spp_areas = missing_spp_areas,</span></span>
-<span id="cb21-9"><a href="#cb21-9"></a><span class="co">#  lineage_extinction = lineage_extinction,</span></span>
-<span id="cb21-10"><a href="#cb21-10"></a><span class="co">#  initial_lambda = initial_lambda,</span></span>
-<span id="cb21-11"><a href="#cb21-11"></a><span class="co">#  initial_disperextirpation = initial_disperextirpation,</span></span>
-<span id="cb21-12"><a href="#cb21-12"></a><span class="co">#  run_parallel = FALSE,</span></span>
-<span id="cb21-13"><a href="#cb21-13"></a><span class="co">#  use_fortran_code = TRUE)</span></span></code></pre></div>
-<p>This vignette does not run the analysis itself (it is commented out) as it takes some minutes, but we have saved the output in an R object. I will now show what the output is like.</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a><span class="kw">data</span>(output_vig)</span>
-<span id="cb22-2"><a href="#cb22-2"></a>output_vig<span class="op">$</span>model_ml</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># output_vig &lt;- lemad_analysis(</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="co">#  phylotree_recons,</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="co">#  species_presence,</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co">#  areas = all_areas,</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="co">#  num_max_multiregion,</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="co">#  condition_on_origin,</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="co">#  DEC_events,</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="co">#  missing_spp_areas = missing_spp_areas,</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="co">#  lineage_extinction = lineage_extinction,</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="co">#  initial_lambda = initial_lambda,</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="co">#  initial_disperextirpation = initial_disperextirpation,</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="co">#  run_parallel = FALSE,</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="co">#  use_fortran_code = TRUE)</span></span></code></pre></div>
+<p>This vignette does not run the analysis itself (it is commented out)
+as it takes some minutes, but we have saved the output in an R object. I
+will now show what the output is like.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(output_vig)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>output_vig<span class="sc">$</span>model_ml</span></code></pre></div>
 <pre><code>## [1] -289.4372</code></pre>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a>output_vig<span class="op">$</span>number_free_pars</span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>output_vig<span class="sc">$</span>number_free_pars</span></code></pre></div>
 <pre><code>## [1] 3</code></pre>
-<p>With the information from “output model_ml” and “output number_free_pars” we can compare across models using AIC. We can see the rates of the model, those are the rates that maximize the likelihood.</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a>output_vig<span class="op">$</span>estimated_rates</span></code></pre></div>
+<p>With the information from “output model_ml” and “output
+number_free_pars” we can compare across models using AIC. We can see the
+rates of the model, those are the rates that maximize the
+likelihood.</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>output_vig<span class="sc">$</span>estimated_rates</span></code></pre></div>
 <pre><code>##          in-situ       vacariance    disper-extirp Fixed_extinction 
 ##       0.25736473       0.02819744       0.15516729       0.00100000</code></pre>
-<p>In-situ speciation is estimated to be higher than vicariance. And, extinction is fixed at 0.001 as we set it up. output$ancestral_states will provide the probability of each ancestor (internal node) being at each region (or combination of regions), here is the first lines of such an object:</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a><span class="kw">head</span>(output_vig<span class="op">$</span>ancestral_states)</span></code></pre></div>
+<p>In-situ speciation is estimated to be higher than vicariance. And,
+extinction is fixed at 0.001 as we set it up. output$ancestral_states
+will provide the probability of each ancestor (internal node) being at
+each region (or combination of regions), here is the first lines of such
+an object:</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(output_vig<span class="sc">$</span>ancestral_states)</span></code></pre></div>
 <pre><code>##            A         B         C         AB         AC         BC        ABC
 ## 67 0.2682301 0.2841787 0.2956666 0.03025912 0.03089593 0.03176905 0.05900050
 ## 68 0.2630152 0.2638226 0.2621206 0.02886072 0.02876747 0.02881161 0.12460188
@@ -409,7 +587,9 @@ To launch the analysis:</p>
 ## 70 0.2570486 0.2764616 0.2935095 0.02922367 0.03031358 0.03132746 0.08211568
 ## 71 0.2694628 0.2702234 0.2530436 0.02956501 0.02861404 0.02865770 0.12043343
 ## 72 0.2752730 0.2808855 0.2335854 0.03046551 0.02785719 0.02814514 0.12378820</code></pre>
-<p>Those are the probabilities for the internal nodes 67, 68 up to 72. Now, one can use a function to plot those values into the phylogenetic tree (function not provided in LEMAD yet).</p>
+<p>Those are the probabilities for the internal nodes 67, 68 up to 72.
+Now, one can use a function to plot those values into our phylogenetic
+tree (function not provided in LEMAD yet, but soon ).</p>
 </div>
 
 

@@ -10,8 +10,6 @@
 #' @param lineage_extinction set "free" to have it estimated or provide a rate to fix it at.
 #' @param initial_lambda Vector of length 2 for initial in-situ and vicariance rates to start the ML search. If NULL, the starting lambda will be taken from a Birth-death process.
 #' @param initial_disperextirpation Intial values for dispersal-local extinction during the ML search. If NULL, it will be equal to lambda/5.
-#' @param run_parallel TRUE or FALSE. We recommend parallel computation only when the phylogeny is large. It will use three computing cores. See note.
-#' @note To run in parallel it is needed to load the following libraries when windows: apTreeshape, doparallel and foreach. When unix, it requires: apTreeshape, doparallel, foreach and doMC
 #' @return List with model's loglik, number of free parameters, estimates of rates, and ancestral locations probabilities.
 #' @examples
 #'# Example of how to set the arguments for a Maximum Likelihood search.
@@ -38,12 +36,10 @@
 #'missing_spp_areas,
 #'lineage_extinction =  0.005,
 #'initial_lambda = NULL,
-#'initial_disperextirpation = NULL,
-#'run_parallel = FALSE,
-#'use_fortran_code = TRUE
+#'initial_disperextirpation = NULL
 #')
 #' 
-#' output$model_ml #  -9.898528 the loglikelihood for the model
+#' output$model_ml #  -9.893469 the loglikelihood for the model
 #' @export
 
 lemad_analysis <- function(phylotree_recons,species_presence,areas,num_max_multiregion,
@@ -52,9 +48,7 @@ lemad_analysis <- function(phylotree_recons,species_presence,areas,num_max_multi
                            missing_spp_areas,
                            lineage_extinction = "free",
                            initial_lambda = NULL,
-                           initial_disperextirpation = NULL,
-                           run_parallel=FALSE,
-                           use_fortran_code = TRUE){
+                           initial_disperextirpation = NULL){
   
   most_widespread_spp <- max(nchar(species_presence),na.rm = TRUE)
   
@@ -217,16 +211,15 @@ lemad_analysis <- function(phylotree_recons,species_presence,areas,num_max_multi
   tol <- c(1e-04, 1e-05, 1e-07)
   maxiter <- 1000 * round((1.25) ^ length(idparsopt))
   methode <- "ode45"
-  optimmethod <- "subplex"
+  optimmethod <- "subplex" # "simplex""   subplex"
   cond <- "proper_cond"
-  
   
   if(is.null(condition_on_origin)){
     root_state_weight <- "proper_weights" 
   } else {
     
     if(any(condition_on_origin == matrices_names)){
-          
+      
       root_state_weight <- rep(0,length(matrices_names))
       root_state_weight[which(condition_on_origin == matrices_names)] <- 1
       
@@ -234,15 +227,9 @@ lemad_analysis <- function(phylotree_recons,species_presence,areas,num_max_multi
     } else {
       stop("your condition_on_origin should contain a valid region")
     }
-
+    
   }
- 
-  
-  
-  if(use_fortran_code){
-    cat("I am using fortran code to numerically solve the equations \n")
-  }
-  
+  is_complete_tree <- FALSE
   
   model <- cla_lemad_ml(
     phylotree_recons,
@@ -256,13 +243,17 @@ lemad_analysis <- function(phylotree_recons,species_presence,areas,num_max_multi
     cond,
     root_state_weight,
     sampling_fraction,
-    tol,
-    maxiter,
-    use_fortran = use_fortran_code,
-    methode,
-    optimmethod,
-    num_cycles = 1,
-    run_parallel)
+    tol = c(1e-04, 1e-05, 1e-07),
+    maxiter = 1000 * round((1.25)^length(idparsopt)),
+    optimmethod = "simplex",
+    num_cycles = 1, 
+    loglik_penalty = 0, 
+    is_complete_tree = is_complete_tree, 
+    verbose = (optimmethod == "subplex"),
+    num_threads = 1,
+    atol = 1e-12,
+    rtol = 1e-12,
+    method = "odeint::bulirsch_stoer")
   
   parameter <- model$MLpars
   
@@ -283,15 +274,25 @@ lemad_analysis <- function(phylotree_recons,species_presence,areas,num_max_multi
     
   }
   
+  num_threads <- 1
   output <- cla_lemad_loglik(parameter, phylotree_recons, species_presence, num_max_multiregion,
-                             use_fortran = use_fortran_code, methode = "ode45", cond = "proper_cond",
-                             root_state_weight = "proper_weights", sampling_fraction,
-                             run_parallel = FALSE, setting_calculation = NULL,
-                             setting_parallel = NULL, see_ancestral_states = TRUE,
-                             loglik_penalty = 0)
+                             cond = "proper_cond",
+                             root_state_weight = "proper_weights",
+                             sampling_fraction,
+                             setting_calculation = NULL,
+                             see_ancestral_states = TRUE,
+                             loglik_penalty = 0,
+                             is_complete_tree = FALSE,
+                             num_threads = 1,
+                             method = ifelse(num_threads == 1,
+                                             "odeint::bulirsch_stoer",
+                                             "odeint::runge_kutta_fehlberg78"),
+                             atol = 1e-16,
+                             rtol = 1e-16)
   
-  
+
   ancestral_states <- output$ancestral_states
+  
   colnames(ancestral_states) <- give_me_states_combination(areas,num_max_multiregion)
   
   return(list(model_ml = model$ML,
@@ -301,28 +302,29 @@ lemad_analysis <- function(phylotree_recons,species_presence,areas,num_max_multi
               matrices = lambdas))
 }
 
-
 cla_lemad_ml <- function(
-  phy,
-  traits,
-  num_max_multiregion,
-  idparslist,
-  idparsopt,
-  initparsopt,
-  idparsfix,
-  parsfix,
-  cond = "proper_cond",
-  root_state_weight = "proper_weights",
-  sampling_fraction,
-  tol = c(1E-4, 1E-5, 1E-7),
-  maxiter = 1000 * round((1.25) ^ length(idparsopt)),
-  use_fortran = TRUE,
-  methode = "ode45",
-  optimmethod = 'simplex',
-  num_cycles = 1,
-  run_parallel = FALSE,
-  loglik_penalty = 0
-){
+    phy,
+    traits,
+    num_max_multiregion,
+    idparslist,
+    idparsopt,
+    initparsopt,
+    idparsfix,
+    parsfix,
+    cond = "proper_cond",
+    root_state_weight = "proper_weights",
+    sampling_fraction,
+    tol = c(1e-04, 1e-05, 1e-07),
+    maxiter = 1000 * round((1.25)^length(idparsopt)),
+    optimmethod = "simplex",
+    num_cycles = 1, 
+    loglik_penalty = 0, 
+    is_complete_tree = FALSE, 
+    verbose = (optimmethod == "subplex"),
+    num_threads = 1,
+    atol = 1e-12,
+    rtol = 1e-12,
+    method = "odeint::bulirsch_stoer") {
   cat("I am checking your input right now \n")
   check_input(traits,phy,num_max_multiregion,sampling_fraction,root_state_weight)
   structure_func <- NULL
@@ -363,28 +365,32 @@ cla_lemad_ml <- function(
   trparsopt[which(initparsopt == Inf)] <- 1
   trparsfix <- parsfix/(1 + parsfix)
   trparsfix[which(parsfix == Inf)] <- 1
-  optimpars <- c(tol,maxiter)
+  mus <- calc_mus(is_complete_tree,
+                  idparslist,
+                  idparsfix,
+                  parsfix,
+                  idparsopt,
+                  initparsopt)
+  optimpars <- c(tol, maxiter)
   
-  if(.Platform$OS.type == "windows" && run_parallel == TRUE){
-    cl <- parallel::makeCluster(2)
-    doParallel::registerDoParallel(cl)
-    setting_calculation <- build_initStates_time_bigtree(phy, traits, num_max_multiregion, sampling_fraction)
-    setting_parallel <- 1
-    on.exit(parallel::stopCluster(cl))
-  }
+  setting_calculation <- build_initStates_time(phy, 
+                                               traits,
+                                               num_max_multiregion,
+                                               sampling_fraction,
+                                               is_complete_tree, 
+                                               mus)
+  setting_parallel <- NULL
   
-  if(.Platform$OS.type == "unix" && run_parallel == TRUE){
-    doMC::registerDoMC(2)
-    setting_calculation <- build_initStates_time_bigtree(phy, traits, num_max_multiregion, sampling_fraction)
-    setting_parallel <- 1
-  } 
-  
-  if(run_parallel == FALSE){
-    setting_calculation <- build_initStates_time(phy,traits,num_max_multiregion,sampling_fraction)
-    setting_parallel <- NULL
-  }
-  if(optimmethod == 'subplex') {verbose <- TRUE} else {verbose <- FALSE}
-  initloglik <- lemad_loglik_choosepar(trparsopt = trparsopt,trparsfix = trparsfix,idparsopt = idparsopt,idparsfix = idparsfix,idparslist = idparslist, structure_func = structure_func,phy = phy, traits = traits,num_max_multiregion = num_max_multiregion , use_fortran=use_fortran,methode = methode,cond=cond,root_state_weight=root_state_weight,sampling_fraction=sampling_fraction,setting_calculation=setting_calculation,run_parallel=run_parallel,setting_parallel=setting_parallel,see_ancestral_states = see_ancestral_states,loglik_penalty = loglik_penalty,verbose = verbose)
+  initloglik <- lemad_loglik_choosepar(trparsopt = trparsopt,trparsfix = trparsfix,idparsopt = idparsopt,idparsfix = idparsfix,idparslist = idparslist, structure_func = structure_func,phy = phy, traits = traits,num_max_multiregion = num_max_multiregion ,cond=cond,root_state_weight = root_state_weight,sampling_fraction = sampling_fraction, 
+                                       setting_calculation = setting_calculation,
+                                       see_ancestral_states = see_ancestral_states, 
+                                       loglik_penalty = loglik_penalty,
+                                       is_complete_tree = is_complete_tree, 
+                                       verbose = verbose,
+                                       num_threads = num_threads,
+                                       atol = atol,
+                                       rtol = rtol,
+                                       method = method)
   cat("The loglikelihood for the initial parameter values is",initloglik,"\n")
   if(initloglik == -Inf)
   {
@@ -393,7 +399,19 @@ cla_lemad_ml <- function(
     cat("Optimizing the likelihood - this may take a while.","\n")
     utils::flush.console()
     cat(setting_parallel,"\n")
-    out <- DDD::optimizer(optimmethod = optimmethod,optimpars = optimpars,fun = lemad_loglik_choosepar,trparsopt = trparsopt,idparsopt = idparsopt,trparsfix = trparsfix,idparsfix = idparsfix,idparslist = idparslist,structure_func = structure_func,phy = phy, traits = traits,num_max_multiregion = num_max_multiregion, use_fortran=use_fortran,methode = methode,cond=cond,root_state_weight=root_state_weight,sampling_fraction=sampling_fraction,setting_calculation=setting_calculation,run_parallel=run_parallel,setting_parallel=setting_parallel,see_ancestral_states = see_ancestral_states, num_cycles = num_cycles, loglik_penalty = loglik_penalty, verbose = verbose)
+    out <- DDD::optimizer(optimmethod = optimmethod,optimpars = optimpars,fun = lemad_loglik_choosepar,trparsopt = trparsopt,idparsopt = idparsopt,trparsfix = trparsfix,idparsfix = idparsfix,idparslist = idparslist,structure_func = structure_func,phy = phy, traits = traits,num_max_multiregion = num_max_multiregion, cond = cond,
+                          root_state_weight = root_state_weight,
+                          sampling_fraction = sampling_fraction,
+                          setting_calculation = setting_calculation,
+                          see_ancestral_states = see_ancestral_states,
+                          num_cycles = num_cycles,
+                          loglik_penalty = loglik_penalty,
+                          is_complete_tree = is_complete_tree, 
+                          verbose = verbose,
+                          num_threads = num_threads,
+                          atol = atol,
+                          rtol = rtol,
+                          method = method)
     if(out$conv != 0)
     {
       stop("Optimization has not converged. Try again with different initial values.\n")

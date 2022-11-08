@@ -1,9 +1,9 @@
 check_input <- function(traits,phy,num_max_multiregion,sampling_fraction,root_state_weight){
   traitStates <- sort(unique(unlist(strsplit(traits, split = ""))))
-
-traitStates <- give_me_states_combination(traitStates,num_max_multiregion)
-
-
+  
+  traitStates <- give_me_states_combination(traitStates,num_max_multiregion)
+  
+  
   if(class(root_state_weight) == "numeric"){
     # if(length(root_state_weight) != length(sort(unique(traits)))){
     #   stop("you need to have as many elements in root_state_weight as traits")
@@ -35,7 +35,7 @@ traitStates <- give_me_states_combination(traitStates,num_max_multiregion)
     }
     
     if(all(sort(unique(as.vector(traits))) == sort(unique(traits[, 1]))) == 
-        FALSE){
+       FALSE){
       stop(
         "Check your trait argument, if you have more than one column, make sure all your states are included in the first column"
       )
@@ -52,6 +52,7 @@ traitStates <- give_me_states_combination(traitStates,num_max_multiregion)
   }
 }
 
+
 lemad_loglik_rhs <- function(t,y,parameter){
   ly <- length(y)
   d <- ly/2
@@ -66,28 +67,13 @@ lemad_loglik_rhs <- function(t,y,parameter){
   return(list(c(dE,dD)))
 }
 
-#' @useDynLib lemad 
-ode_FORTRAN <- function(
-  y,
-  times,
-  func = "lemad_runmod",
-  parms,
-  method,
-  ...
-)
-{
-  n_vars <- length(y)
-  parms <- as.numeric(unlist(parms))
-  n_pars <- length(parms)
-  probs <- deSolve::ode(y = y, parms = c(n_vars + 0.), rpar = parms, 
-                          times = times, func = func, initfunc = "secsse_initmod", 
-                          ynames = c("SV"), dimens = n_pars, nout = 1, 
-                          dllname = "lemad", method = method, ...
-  )[,1:(n_vars + 1)]
-  return(probs)
-}
 
-build_initStates_time <- function(phy,traits,num_max_multiregion,sampling_fraction){ 
+build_initStates_time <- function(phy,
+                                  traits,
+                                  num_max_multiregion,
+                                  sampling_fraction,
+                                  is_complete_tree = FALSE,
+                                  mus = NULL){ 
   if(is.matrix(traits)){
     stop("matrix option in traits not implemented yet")## trait might be a matrix when a species has more than one state
     traitStates <- sort(unique())
@@ -150,7 +136,7 @@ build_initStates_time <- function(phy,traits,num_max_multiregion,sampling_fracti
     }
     ####
     for(iii in 1:length(traitStates)){ # Initial state probabilities
-
+      
       tipSampling <- 1 * sampling_fraction
       states[which(traits == traitStates[iii]),length(traitStates) +iii] <- tipSampling[iii]
     }
@@ -190,14 +176,14 @@ build_initStates_time <- function(phy,traits,num_max_multiregion,sampling_fracti
 }
 
 calThruNodes <- function(
-  ances,
-  states,
-  loglik,
-  forTime,
-  parameter,
-  use_fortran,
-  methode,
-  phy
+    ances,
+    states,
+    loglik,
+    forTime,
+    parameter,
+    use_fortran,
+    methode,
+    phy
 ){
   lambdas <- parameter[[1]]
   mus <- parameter[[2]]
@@ -226,8 +212,8 @@ calThruNodes <- function(
                              method = methode)
     } else {
       nodeMN <- ode_FORTRAN(y = y, func = "lemad_runmod",
-                             times = c(0,timeInte), parms = parameter,  rtol = reltol, atol = abstol,
-                             method = methode)
+                            times = c(0,timeInte), parms = parameter,  rtol = reltol, atol = abstol,
+                            method = methode)
     }
     if(desIndex == 1){
       nodeN <- nodeMN
@@ -247,7 +233,7 @@ calThruNodes <- function(
   #  mergeBranch <- c(mergeBranch,combProb)
   #}
   mergeBranch <- nodeM[(1:d) + d] * nodeN[(1:d) + d] * lambdas[(1:d)]
-
+  
   ff <- lemad_normalize_loglik(mergeBranch,loglik); mergeBranch <- ff$probs; loglik <- ff$loglik
   #sumD <- sum(mergeBranch)
   #mergeBranch <- mergeBranch/sumD
@@ -387,32 +373,32 @@ doParalThing <- function(take_ancesSub,
   ii <- NULL
   rm(ii)
   statesNEW <- foreach::foreach(ii = 1:2,
-                                 .packages = c(
-                                   "lemad",
-                                   #"diversitree",
-                                   "deSolve",
-                                   "phylobase",
-                                   "foreach",
-                                   "doParallel",
-                                   "geiger",
-                                   "apTreeshape"),
-                                 .export = c(
-                                   "lemad_loglik",
-                                   "ode_FORTRAN",
-                                   #"phy",
-                                   #"methode",
-                                   "calThruNodes"
-                                   #,"use_fortran")) %dopar% {
-                                   )) %dopar% { 
-                                     ancesSub <- take_ancesSub[[ii]]
-                                     for(i in 1:length(ancesSub)){
-                                       calcul <- 
-                                         calThruNodes(ancesSub[i], states, loglik, forTime, parameter, use_fortran = use_fortran,methode = methode, phy = phy)
-                                       loglik <- calcul$loglik
-                                       states <- calcul$states
-                                     }
-                                     list(states, loglik)
-                                   }
+                                .packages = c(
+                                  "lemad",
+                                  #"diversitree",
+                                  "deSolve",
+                                  "phylobase",
+                                  "foreach",
+                                  "doParallel",
+                                  "geiger",
+                                  "apTreeshape"),
+                                .export = c(
+                                  "lemad_loglik",
+                                  "ode_FORTRAN",
+                                  #"phy",
+                                  #"methode",
+                                  "calThruNodes"
+                                  #,"use_fortran")) %dopar% {
+                                )) %dopar% { 
+                                  ancesSub <- take_ancesSub[[ii]]
+                                  for(i in 1:length(ancesSub)){
+                                    calcul <- 
+                                      calThruNodes(ancesSub[i], states, loglik, forTime, parameter, use_fortran = use_fortran,methode = methode, phy = phy)
+                                    loglik <- calcul$loglik
+                                    states <- calcul$states
+                                  }
+                                  list(states, loglik)
+                                }
   return(statesNEW)
 }
 
@@ -614,7 +600,7 @@ build_initStates_time_bigtree <-
     ancesRest <- NULL
     for(i in 1:length(ances)){
       if(any(any(ances[i] == descenSub1) |
-              any(ances[i] == descenSub2)) == FALSE)
+             any(ances[i] == descenSub2)) == FALSE)
       {
         ancesRest <- c(ancesRest, ances[i])
       }
@@ -632,24 +618,24 @@ build_initStates_time_bigtree <-
   }
 
 lemad_loglik <- function(parameter,
-                          phy,
-                          traits,
-                          num_concealed_states,
-                          use_fortran = TRUE,
-                          methode = "ode45",
-                          cond = "proper_cond",
-                          root_state_weight = "proper_weights",
-                          sampling_fraction,
-                          run_parallel = FALSE,
-                          setting_calculation = NULL,
-                          setting_parallel= NULL,
-                          see_ancestral_states = FALSE,
-                          loglik_penalty = 0){
+                         phy,
+                         traits,
+                         num_concealed_states,
+                         use_fortran = TRUE,
+                         methode = "ode45",
+                         cond = "proper_cond",
+                         root_state_weight = "proper_weights",
+                         sampling_fraction,
+                         run_parallel = FALSE,
+                         setting_calculation = NULL,
+                         setting_parallel= NULL,
+                         see_ancestral_states = FALSE,
+                         loglik_penalty = 0){
   lambdas <- parameter[[1]]
   mus <- parameter[[2]]
   parameter[[3]][is.na(parameter[[3]])] <- 0
   Q <- parameter[[3]]
-
+  
   if(run_parallel == TRUE){ 
     if(is.null(setting_calculation)){
       check_input(traits,phy,sampling_fraction,root_state_weight)
@@ -719,7 +705,7 @@ lemad_loglik <- function(parameter,
     states <- setting_calculation$states
     forTime <- setting_calculation$forTime
     ances <- setting_calculation$ances
-  
+    
     if(num_concealed_states != round(num_concealed_states)){ # for testing 
       d <- ncol(states) / 2 
       new_states <- states[,c(1:sqrt(d),(d + 1):((d + 1) + sqrt(d) - 1))]

@@ -1,5 +1,2 @@
-all : clean
-
-clean :
-	@rm -rf *.mod *.o
-	
+CXX_STD = CXX14
+PKG_LIBS = `${R_HOME}/bin/Rscript -e "RcppParallel::RcppParallelLibs()"`

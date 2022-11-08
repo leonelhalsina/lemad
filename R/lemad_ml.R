@@ -205,18 +205,18 @@ lemad_loglik_choosepar <-
            phy = phy,
            traits = traits,
            num_max_multiregion = num_max_multiregion,
-           use_fortran = use_fortran,
-           methode,
            cond = cond,
-           root_state_weight = root_state_weight,
-           sampling_fraction = sampling_fraction,
-           setting_calculation = setting_calculation,
-           run_parallel = run_parallel,
-           setting_parallel = setting_parallel,
-           see_ancestral_states = see_ancestral_states,
-           loglik_penalty = loglik_penalty,
-           verbose = verbose
-           ) {
+                                    root_state_weight = root_state_weight, 
+                                    sampling_fraction = sampling_fraction, 
+                                    setting_calculation = setting_calculation,
+                                    see_ancestral_states = see_ancestral_states, 
+                                    loglik_penalty = loglik_penalty,
+                                    is_complete_tree = is_complete_tree, 
+                                    verbose = verbose,
+                                    num_threads = num_threads,
+                                    atol = atol,
+                                    rtol = rtol,
+                                    method = method) {
     alltrpars <- c(trparsopt, trparsfix)
     if (max(alltrpars) > 1 | min(alltrpars) < 0) {
       loglik = -Inf
@@ -238,17 +238,17 @@ lemad_loglik_choosepar <-
             phy = phy,
             traits = traits,
             num_max_multiregion = num_max_multiregion,
-            use_fortran = use_fortran,
-            methode = methode,
-            cond = cond,
-            root_state_weight = root_state_weight,
-            sampling_fraction = sampling_fraction,
-            run_parallel = run_parallel,
-            setting_calculation = setting_calculation,
-            setting_parallel = setting_parallel,
-            see_ancestral_states = see_ancestral_states,
-            loglik_penalty = loglik_penalty
-          )
+                                        cond = cond,
+                                        root_state_weight = root_state_weight,
+                                        sampling_fraction = sampling_fraction,
+                                        setting_calculation = setting_calculation, 
+                                        see_ancestral_states = see_ancestral_states,
+                                        loglik_penalty = loglik_penalty,
+                                        is_complete_tree = is_complete_tree,
+                                        num_threads = num_threads,
+                                        atol = atol,
+                                        rtol = rtol,
+                                        method = method)
       } else {
         loglik <-
           lemad_loglik(

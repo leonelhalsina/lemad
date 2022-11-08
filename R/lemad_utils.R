@@ -518,3 +518,37 @@ give_me_states_combination <- function(areas,num_max_multiregion){
   return(matrices_names)
 
 }
+
+
+#' @rawNamespace useDynLib(lemad, .registration = TRUE)
+#' @rawNamespace import(Rcpp)
+#' @rawNamespace importFrom(RcppParallel, RcppParallelLibs)
+#' @keywords internal
+normalize_loglik <- function(probs, loglik) {
+    sumabsprobs <- sum(abs(probs))
+    probs <- probs / sumabsprobs
+    loglik <- loglik + log(sumabsprobs)
+    cat(probs, loglik, "\n")
+    return(list(probs = probs, loglik = loglik))
+}
+
+penalty <- function(pars, loglik_penalty = 0) {
+    pars <- unlist(unlist(pars))
+    return(loglik_penalty * sum(pars^2)/(2 * length(pars)))
+}
+
+calc_mus <- function(is_complete_tree,
+                     idparslist,
+                     idparsfix,
+                     parsfix,
+                     idparsopt,
+                     initparsopt) {
+    mus <- NULL
+    if (is_complete_tree) {
+        mus <- rep(NA, length(idparslist[[2]]))
+        for (i in seq_along(idparslist[[2]])) {
+            mus[i] <- c(parsfix[which(idparsfix == idparslist[[2]][i])], initparsopt[which(idparsopt == idparslist[[2]][i])])
+        }
+    }
+    return(mus)
+}
