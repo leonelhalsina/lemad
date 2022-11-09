@@ -374,7 +374,9 @@ lemad_prepare_q_matrix <- function(all_area_combination,matrices_names,
 #' all_locations <- c("A","B","C") 
 #' id_rate_insitu <- 1
 #' id_rate_vicariance <- 2
-#' prepare_full_lambdas_vicariance(all_locations)
+#' num_max_multiregion <- 3
+#' DEC_events <- FALSE
+#' prepare_full_lambdas_vicariance(all_locations,num_max_multiregion,id_rate_insitu,id_rate_vicariance,DEC_events)
 #' @export
 
 prepare_full_lambdas_vicariance <- function (areas,num_max_multiregion,id_rate_insitu,id_rate_vicariance,DEC_events){

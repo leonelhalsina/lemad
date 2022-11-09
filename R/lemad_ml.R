@@ -409,7 +409,7 @@ lemad_ml <- function(
     setting_parallel <- NULL
   }
   if(optimmethod == 'subplex') {verbose <- TRUE} else {verbose <- FALSE}
-  initloglik <- lemad_loglik_choosepar(trparsopt = trparsopt,trparsfix = trparsfix,idparsopt = idparsopt,idparsfix = idparsfix,idparslist = idparslist, structure_func = structure_func, phy = phy, traits = traits,num_concealed_states=num_concealed_states,use_fortran=use_fortran,methode = methode,cond=cond,root_state_weight=root_state_weight,sampling_fraction=sampling_fraction,setting_calculation=setting_calculation,run_parallel=run_parallel,setting_parallel = setting_parallel,see_ancestral_states = see_ancestral_states, loglik_penalty = loglik_penalty,verbose = verbose)
+  initloglik <- lemad_loglik_choosepar(trparsopt = trparsopt,trparsfix = trparsfix,idparsopt = idparsopt,idparsfix = idparsfix,idparslist = idparslist, structure_func = structure_func, phy = phy, traits = traits,cond=cond,root_state_weight=root_state_weight,sampling_fraction=sampling_fraction,setting_calculation=setting_calculation,see_ancestral_states = see_ancestral_states, loglik_penalty = loglik_penalty,verbose = verbose)
   cat("The loglikelihood for the initial parameter values is",initloglik,"\n")
   if(initloglik == -Inf)
   {

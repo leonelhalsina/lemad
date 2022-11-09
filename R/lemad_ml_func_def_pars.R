@@ -136,17 +136,11 @@ lemad_ml_func_def_pars <- function(phy,
       structure_func = structure_func,
       phy = phy,
       traits = traits,
-      num_concealed_states =
-        num_concealed_states,
-      use_fortran = use_fortran,
-      methode = methode,
       cond = cond,
       root_state_weight = root_state_weight,
       sampling_fraction = sampling_fraction,
       setting_calculation =
         setting_calculation,
-      run_parallel = run_parallel,
-      setting_parallel = setting_parallel,
       see_ancestral_states = see_ancestral_states,
       loglik_penalty = loglik_penalty,
       verbose = verbose

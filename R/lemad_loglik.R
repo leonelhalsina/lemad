@@ -353,9 +353,6 @@ calThruNodes <- function(
 #     nodeM = nodeM
 #   ))
 # }
-#' @importFrom foreach foreach
-#' @importFrom doParallel registerDoParallel
-#' @importFrom foreach %dopar%
 
 doParalThing <- function(take_ancesSub,
                          states,

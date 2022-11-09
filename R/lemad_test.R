@@ -107,9 +107,8 @@ lemad_test_mlsearch <- function(){
     missing_spp_areas,
     lineage_extinction = 0.005,
     initial_lambda = NULL,
-    initial_disperextirpation = NULL,
-    run_parallel = FALSE,
-    use_fortran_code = TRUE)
+    initial_disperextirpation = NULL
+)
   
   testthat::expect_equal(round(output1$model_ml,digits = 6),-9.937853)
 }
@@ -131,9 +130,8 @@ lemad_test_mlsearch2 <- function(){
     missing_spp_areas,
     lineage_extinction = 0.005,
     initial_lambda = NULL,
-    initial_disperextirpation = NULL,
-    run_parallel = FALSE,
-    use_fortran_code = TRUE)
+    initial_disperextirpation = NULL
+)
   
   testthat::expect_equal(round(output2$model_ml,digits = 6),-9.559753)
 }
