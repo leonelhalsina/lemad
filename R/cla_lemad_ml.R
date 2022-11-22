@@ -3,7 +3,7 @@
 #' @param phylotree_recons phylogenetic tree of class phylo, ultrametric, rooted and with branch lengths.
 #' @param species_presence a vector (of class character) with regions for each species. Coded in letters: "C"  "A"  "C"  "C" . Same order than tree tips
 #' @param areas a vector that includes all the regions. Do not include any combination of locations
-#' @param num_max_multiregion integer indicating the maximum number of regions a lineage can possible take at a given point in time. It can go from 2 to length(areas).
+#' @param num_max_multiregion indicates the maximum number of regions a lineage can possible take at a given point in time. It can go from 2 to length(areas). Alternatively, it can be a vector of length 2: first element to be the maximum number of regions and the second a letter that represents "without any modern species" e.g.,num_max_multiregion = c(3,"D")  
 #' @param condition_on_origin If NULL, the conditioning on the crown origin follows Herrera-Alsina et al. 2019 (Syst. Biol.). But the user can provide the hypothesized root state: condition_on_origin <- "A"
 #' @param DEC_events DIVA and DEC models differ sligthly in the type of events that are allowed e.g., vacariance narrow 
 #' @param missing_spp_areas a list informing the proportion of missing species (missing from the tree) per location. Only include incomplete locations in this list. See example. If tree is complete, use NULL.
@@ -52,10 +52,25 @@ lemad_analysis <- function(phylotree_recons,species_presence,areas,num_max_multi
   
   most_widespread_spp <- max(nchar(species_presence),na.rm = TRUE)
   
-  if(num_max_multiregion == 1){
+  unique_areas_tocheck <- sort(unique(unlist(strsplit(species_presence, split = ""))))
+  
+  if(class(num_max_multiregion[2]) == "character"){
+    if(any(c(areas,unique_areas_tocheck) == num_max_multiregion[2]) == FALSE){ # is num_max_multiregion[2] in the areas or the presence vector?
+      cat( "you are doing an analysis with -areas without any modern species-   \n")
+    } else {
+      stop ("if you are trying an analysis with areas with no modern species, double check your areas and presence vector: num_max_multiregion[2] should not be included in either vector ")
+    }
+    
+  } 
+  
+  if(length(unique_areas_tocheck) != length(areas)){   
+    stop("your vector of species presences has to be consistent with vector of areas")
+  }
+  
+  if(num_max_multiregion[1] == 1){
     stop("num_max_multiregion should be higher than 1 so you can have multi-region species")
   }
-  if(num_max_multiregion < most_widespread_spp){
+  if(num_max_multiregion[1] < most_widespread_spp){
     
     stop("some of your species are in more areas than num_max_multiregion ")
   }
@@ -76,8 +91,11 @@ lemad_analysis <- function(phylotree_recons,species_presence,areas,num_max_multi
   id_the_mu <- c(3,3)
   id_q_expansion <- 4
   id_q_contraction <- 4
-  
-  matrices <- prepare_full_lambdas_vicariance(areas,num_max_multiregion,id_rate_insitu,
+if(class(num_max_multiregion[2]) == "character"){ # area with no modern species
+    areas <- c(areas,num_max_multiregion[2]) 
+}
+ 
+  matrices <- prepare_full_lambdas_vicariance(areas,num_max_multiregion[1],id_rate_insitu,
                                               id_rate_vicariance,DEC_events)
   
   lambdas <- matrices$all_matrices
@@ -93,17 +111,14 @@ lemad_analysis <- function(phylotree_recons,species_presence,areas,num_max_multi
     } else {
       mus <- c(mus,id_the_mu[2])
     }
-    
   }
   
   qs <- lemad_prepare_q_matrix(all_area_combination,matrices_names,
                                id_q_expansion,id_q_contraction)
-  
   idparslist <- list() 
   idparslist[[1]] <- lambdas
   idparslist[[2]] <- mus
   idparslist[[3]] <- qs
-  
   
   if(class(missing_spp_areas) == "list"){
     sampling_fraction <- rep(1,length(lambdas))
@@ -217,12 +232,9 @@ lemad_analysis <- function(phylotree_recons,species_presence,areas,num_max_multi
   if(is.null(condition_on_origin)){
     root_state_weight <- "proper_weights" 
   } else {
-    
     if(any(condition_on_origin == matrices_names)){
-      
       root_state_weight <- rep(0,length(matrices_names))
       root_state_weight[which(condition_on_origin == matrices_names)] <- 1
-      
       
     } else {
       stop("your condition_on_origin should contain a valid region")
@@ -230,7 +242,6 @@ lemad_analysis <- function(phylotree_recons,species_presence,areas,num_max_multi
     
   }
   is_complete_tree <- FALSE
-  
   model <- cla_lemad_ml(
     phylotree_recons,
     species_presence,
@@ -290,10 +301,9 @@ lemad_analysis <- function(phylotree_recons,species_presence,areas,num_max_multi
                              atol = 1e-16,
                              rtol = 1e-16)
   
-
-  ancestral_states <- output$ancestral_states
   
-  colnames(ancestral_states) <- give_me_states_combination(areas,num_max_multiregion)
+  ancestral_states <- output$ancestral_states
+  colnames(ancestral_states) <- give_me_states_combination(areas,num_max_multiregion[1])
   
   return(list(model_ml = model$ML,
               number_free_pars = length(idparsopt),

@@ -381,11 +381,11 @@ lemad_prepare_q_matrix <- function(all_area_combination,matrices_names,
 
 prepare_full_lambdas_vicariance <- function (areas,num_max_multiregion,id_rate_insitu,id_rate_vicariance,DEC_events){
   all_matrices <- list()
-  if (num_max_multiregion > length(areas)) {
+  if (num_max_multiregion[1] > length(areas)) {
     stop("num_max_multiregion cannot be longer than the vector of areas")
   }
   all_area_combination <- NULL
-  for (i in 1:num_max_multiregion) {
+  for (i in 1:num_max_multiregion[1]) {
     combination_from_function <- combn(areas, i)
     all_area_combination <- cbind(all_area_combination, combination_from_function)
     all_area_combination <- rbind(all_area_combination, NA)
@@ -500,11 +500,11 @@ find_stateID <- function(region_to_compare,all_area_combination){
 
 give_me_states_combination <- function(areas,num_max_multiregion){
   
-  if(num_max_multiregion > length(areas)){
+  if(num_max_multiregion[1] > length(areas)){
     stop("num_max_multiregion cannot be longer than the vector of areas")
   }
   all_area_combination <- NULL
-  for(i in 1:num_max_multiregion){
+  for(i in 1:num_max_multiregion[1]){
     combination_from_function <- combn(areas,i)
     all_area_combination <- cbind(all_area_combination,combination_from_function)
     all_area_combination <- rbind(all_area_combination,NA)

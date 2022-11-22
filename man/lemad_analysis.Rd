@@ -24,7 +24,7 @@ lemad_analysis(
 
 \item{areas}{a vector that includes all the regions. Do not include any combination of locations}
 
-\item{num_max_multiregion}{integer indicating the maximum number of regions a lineage can possible take at a given point in time. It can go from 2 to length(areas).}
+\item{num_max_multiregion}{indicates the maximum number of regions a lineage can possible take at a given point in time. It can go from 2 to length(areas). Alternatively, it can be a vector of length 2: first element to be the maximum number of regions and the second a letter that represents "without any modern species" e.g.,num_max_multiregion = c(3,"D")}
 
 \item{condition_on_origin}{If NULL, the conditioning on the crown origin follows Herrera-Alsina et al. 2019 (Syst. Biol.). But the user can provide the hypothesized root state: condition_on_origin <- "A"}
 

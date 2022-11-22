@@ -1,7 +1,7 @@
 check_input <- function(traits,phy,num_max_multiregion,sampling_fraction,root_state_weight){
   traitStates <- sort(unique(unlist(strsplit(traits, split = ""))))
   
-  traitStates <- give_me_states_combination(traitStates,num_max_multiregion)
+  #traitStates <- give_me_states_combination(traitStates,num_max_multiregion)
   
   
   if(class(root_state_weight) == "numeric"){
@@ -40,11 +40,7 @@ check_input <- function(traits,phy,num_max_multiregion,sampling_fraction,root_st
         "Check your trait argument, if you have more than one column, make sure all your states are included in the first column"
       )
     }
-  } else{
-    if(length(sampling_fraction) != length(traitStates)){
-      stop("sampling_fraction must have as many elements as traits you have")
-    }
-  }
+  } 
   
   if(length(sort(unique(as.vector(traitStates)))) < 2)
   {
@@ -84,8 +80,13 @@ build_initStates_time <- function(phy,
   
   
   #traits <- c("a","b","c","d")
-  
-  traitStates <- give_me_states_combination(traitStates,num_max_multiregion)
+  if(class(num_max_multiregion[2])=="character"){ # areas with no modern species
+    traitStates <- c(traitStates,num_max_multiregion[2])
+    traitStates <- give_me_states_combination(traitStates,num_max_multiregion[1])
+  } else {
+     traitStates <- give_me_states_combination(traitStates,num_max_multiregion) 
+  }
+
   
   
   
