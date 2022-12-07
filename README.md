@@ -23,7 +23,7 @@ devtools::install(build_vignettes = TRUE)
 browseVignettes("lemad")
 ```
 ### Wiki
-Have a look at our Wiki to see news and a record of important upgrades to LEMAD. For instance, on November 2022 LEMAD became super fast.
+Have a look at our Wiki to see news and a record of important upgrades to LEMAD. For instance, on November 2022 LEMAD became super fast: https://github.com/leonelhalsina/lemad/wiki
 
 ### Cite
 
