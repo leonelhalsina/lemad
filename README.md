@@ -23,10 +23,7 @@ devtools::install(build_vignettes = TRUE)
 browseVignettes("lemad")
 ```
 ### News
-
-1- On November 8th we have released a version 2.1.0 where c++ code (from Thijs Janzen, University of Groningen) is used to reduce computation time. It is a shame that we could not include this nice feature at the time of publishing the paper three months ago. In the paper we mentioned that a 66-species tree and 3 areas (which means it is total of 7 areas because all combinations) takes 10 minutes to complete analysis. With this c++ improvement, that time is shorted. It now takes 5 seconds.
-
-2- On December 7th we have release a version 2.1.1 to be able to include an region "with no modern species" into the analysis. Additionally, LEMAD can take a tailored matrix to define what dispersal/extirpation events can take place. Vignette is updated. 
+Have a look at our Wiki to see what LEMAD is now capable of. For instance, on November 2022 LEMAD became super fast.
 
 ### Cite
 
