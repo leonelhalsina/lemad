@@ -3,13 +3,13 @@
 #' @param phylotree_recons phylogenetic tree of class phylo, ultrametric, rooted and with branch lengths.
 #' @param species_presence a vector (of class character) with regions for each species. Coded in letters: "C"  "A"  "C"  "C" . Same order than tree tips
 #' @param areas a vector that includes all the regions. Do not include any combination of locations
-#' @param num_max_multiregion indicates the maximum number of regions a lineage can possible take at a given point in time. It can go from 2 to length(areas). Alternatively, it can be a vector of length 2: first element to be the maximum number of regions and the second a letter that represents "without any modern species" e.g.,num_max_multiregion = c(3,"D")  
+#' @param num_max_multiregion indicates the maximum number of regions a lineage can possible take at a given point in time. It can go from 2 to length(areas). Alternatively, it can be a vector of length 2: first element to be the maximum number of regions and the second a letter that represents "without any modern species" e.g.,num_max_multiregion = c(3,"D"). See vignette  
 #' @param condition_on_origin If NULL, the conditioning on the crown origin follows Herrera-Alsina et al. 2019 (Syst. Biol.). But the user can provide the hypothesized root state: condition_on_origin <- "A"
 #' @param DEC_events DIVA and DEC models differ sligthly in the type of events that are allowed e.g., vacariance narrow 
 #' @param missing_spp_areas a list informing the proportion of missing species (missing from the tree) per location. Only include incomplete locations in this list. See example. If tree is complete, use NULL.
 #' @param lineage_extinction set "free" to have it estimated or provide a rate to fix it at.
 #' @param initial_lambda Vector of length 2 for initial in-situ and vicariance rates to start the ML search. If NULL, the starting lambda will be taken from a Birth-death process.
-#' @param initial_disperextirpation Intial values for dispersal-local extinction during the ML search. If NULL, it will be equal to lambda/5.
+#' @param initial_disperextirpation Intial values for dispersal-local extinction during the ML search. If NULL, it will be equal to lambda/5. For advanced analysis, it can take a transition matrix to allow or restrict certain dispersal or extirpation events. See vignette
 #' @return List with model's loglik, number of free parameters, estimates of rates, and ancestral locations probabilities.
 #' @examples
 #'# Example of how to set the arguments for a Maximum Likelihood search.
@@ -103,7 +103,6 @@ if(class(num_max_multiregion[2]) == "character"){ # area with no modern species
   matrices_names <- matrices$matrices_names
   
   
-  # here, the mus will be sorted in such a way that species present in more than one location, cannot go extinct
   mus <- NULL
   for(ui in 1:length(lambdas)){
     if(ui <= length(areas)){
@@ -113,8 +112,14 @@ if(class(num_max_multiregion[2]) == "character"){ # area with no modern species
     }
   }
   
-  qs <- lemad_prepare_q_matrix(all_area_combination,matrices_names,
+  if(class(initial_disperextirpation)[[1]] == "matrix"){ # User defined transition matrix
+    qs <- initial_disperextirpation
+    
+  } else {
+      qs <- lemad_prepare_q_matrix(all_area_combination,matrices_names,
                                id_q_expansion,id_q_contraction)
+  }
+
   idparslist <- list() 
   idparslist[[1]] <- lambdas
   idparslist[[2]] <- mus
@@ -155,10 +160,10 @@ if(class(num_max_multiregion[2]) == "character"){ # area with no modern species
   ####### this bit will use a set of initial values for ALL the parameters to be estimated
   ####### This is intended as a routine to continue an optimization that did not finish.
   #######  The idea is to use the last parameters shown at the R console
-  if(length(initial_lambda) > 2 & class(initial_disperextirpation) == "character"){
+  if(length(initial_lambda) > 2 & class(initial_disperextirpation)[[1]] == "character"){
     
     if(initial_disperextirpation != "continuing"){
-      stop("check your initial_disperextirpation, it should be numerical")
+      stop("check your initial_disperextirpation, it should be numerical, or a matrix of transitions for -user's transition matrix-")
     }
     
     if(class(lineage_extinction) == "character"){
@@ -195,13 +200,13 @@ if(class(num_max_multiregion[2]) == "character"){ # area with no modern species
       intGuessLamba <- initial_lambda
     }
     
-    if(is.null(initial_disperextirpation )){
+    if(is.null(initial_disperextirpation) || class(initial_disperextirpation)[[1]] == "matrix" ){
       initial_disperextirpation_rate <- startingpoint$mu0/5
       # intGuessMu <- startingpoint$mu0
       
     } else {
       if(class(initial_disperextirpation) != "numeric"){
-        stop ("intial_lambda should be a number")
+        stop ("intial_dispersal should be a number, or a matrix of transitions for -user's transition matrix-")
       }
       
       initial_disperextirpation_rate <- initial_disperextirpation

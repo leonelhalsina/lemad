@@ -24,7 +24,7 @@ lemad_analysis(
 
 \item{areas}{a vector that includes all the regions. Do not include any combination of locations}
 
-\item{num_max_multiregion}{indicates the maximum number of regions a lineage can possible take at a given point in time. It can go from 2 to length(areas). Alternatively, it can be a vector of length 2: first element to be the maximum number of regions and the second a letter that represents "without any modern species" e.g.,num_max_multiregion = c(3,"D")}
+\item{num_max_multiregion}{indicates the maximum number of regions a lineage can possible take at a given point in time. It can go from 2 to length(areas). Alternatively, it can be a vector of length 2: first element to be the maximum number of regions and the second a letter that represents "without any modern species" e.g.,num_max_multiregion = c(3,"D"). See vignette}
 
 \item{condition_on_origin}{If NULL, the conditioning on the crown origin follows Herrera-Alsina et al. 2019 (Syst. Biol.). But the user can provide the hypothesized root state: condition_on_origin <- "A"}
 
@@ -36,7 +36,7 @@ lemad_analysis(
 
 \item{initial_lambda}{Vector of length 2 for initial in-situ and vicariance rates to start the ML search. If NULL, the starting lambda will be taken from a Birth-death process.}
 
-\item{initial_disperextirpation}{Intial values for dispersal-local extinction during the ML search. If NULL, it will be equal to lambda/5.}
+\item{initial_disperextirpation}{Intial values for dispersal-local extinction during the ML search. If NULL, it will be equal to lambda/5. For advanced analysis, it can take a transition matrix to allow or restrict certain dispersal or extirpation events. See vignette}
 }
 \value{
 List with model's loglik, number of free parameters, estimates of rates, and ancestral locations probabilities.

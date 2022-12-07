@@ -1,7 +1,7 @@
 Package: lemad
 Type: Package
 Title: Lineage Extinction Model of Ancestral Distribution
-Version: 2.1.0
+Version: 2.1.1
 Date: 2022-11-08
 License: GPL-3
 Authors@R: person("Leonel", "Herrera Alsina", email = "leonelhalsina@gmail.com", role = "cre")

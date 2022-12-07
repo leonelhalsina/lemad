@@ -80,7 +80,9 @@ when num_max_multiregion = 2, we get 15 different distributions
 when num_max_multiregion = 3, we get 25 different distributions
 when num_max_multiregion = 4, we get 30 different distributions
 
-LEMAD, even though precise, is sort of slow. The higher the number of potential distributions, the more equations have to be solved and the slower the analysis is. We cannot set num_max_multiregion to 1 because we need some (at least) two-region species because the model assumes there are vicariance events.
+The higher the number of potential distributions, the more equations have to be solved and the slower the analysis is. We cannot set num_max_multiregion to 1 because we need some (at least) two-region species because the model assumes there are vicariance events.
+LEMAD also offers the option to account for an region that it was part of the past distribution of a clade but it is not at the present time. Imagine Antarctica for instance which might have been key for the diversification process of a clade/radiation but at some point stopped being inhabited by species. This means that our clade is distributed in regions A, B and C but region D (currently empty, no modern species lives in D) might have been important. Notice that we are taking the model at very limit because there is no tree tip that contributes to the calculation of probabilities of ancestors living in region D. To run this analysis, we use the same dataset, the only thing that changes is the argument num_max_multiregion. For the analysis that includes an area with no modern species, we do: num_max_multiregion <- c(3,"D"). Similar to what we set up before, we are saying that the maximum number of regions that an ancestor can take is 3. And that, besides the regions A,B and C that we define in all_areas, we have region "D" too.  
+
 In LEMAD we can fit models where the extinction rate is fixed to a certain figure. This means that the provided rate will be plugged into the analysis. At the end, we will get a likelihood value for such a model. When fixing the model to a different extinction rate, the likelihood could be different. By comparing both results, we will know which model is supported better. Also, we can let the extinction rate be estimated during the calculation. To do that we use the argument:
 ```{r}
 #lineage_extinction <- "free"
@@ -99,6 +101,30 @@ DEC_events <- FALSE # to choose DIVAevents
 # or when choosing DECevents:
 # DEC_events <- TRUE 
 ```
+There are cases where the user wishes to define his/her own matrix of dispersal and extirpation events. Let us first see what the default matrix is like, we do that with the following lines:
+
+```{r}
+object_a <- prepare_full_lambdas_vicariance(all_areas,num_max_multiregion,1,2,DEC_events)
+
+my_dispersal_extirpationMatrix <- lemad_prepare_q_matrix(
+  object_a$all_area_combination,object_a$matrices_names,4,4)
+my_dispersal_extirpationMatrix
+```
+If you are setting up an analysis that includes "a region with no modern species in", you might need to use
+```{r}
+prepare_full_lambdas_vicariance(c(all_areas,"D"),num_max_multiregion,1,2,DEC_events)
+```
+so the area "D" is included too.  
+Now, we can call my_dispersal_extirpationMatrix and edit as we wish. Notice that we use the number 4 to indicate what movements/transitions are possible and 0 for those that are not. To edit, you could do:
+```{r}
+# my_dispersal_extirpationMatrix[1,4] <- 0
+```
+Remember that the main diagonal should keep NAs. Please make sure that after editing, the following expression class(my_dispersal_extirpationMatrix) retrieves "matrix" "array". The last step is to do:
+```{r}
+initial_disperextirpation <- my_dispersal_extirpationMatrix
+```
+In summary, initial_disperextirpation can 1) be NULL (lemad will take 1/5 of initial lambda to start the optimization), 2) be a number provided by the user (lemad will start the optimization from this value) or 3) be a dispersal/extirpation matrix defined by the user (in that case the optimization will start in a value 1/5 lambda).
+
 Finally, we can incorporate information on the distribution of the common ancestor of the whole clade. So, LEMAD will compute the likelihood conditioned on the information we provided. To indicate that the very first ancestor of the clade was present in area A, We do:
 ```{r}
 # condition_on_origin <- A

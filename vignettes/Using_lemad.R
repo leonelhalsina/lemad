@@ -57,6 +57,22 @@ DEC_events <- FALSE # to choose DIVAevents
 # DEC_events <- TRUE 
 
 ## -----------------------------------------------------------------------------
+object_a <- prepare_full_lambdas_vicariance(all_areas,num_max_multiregion,1,2,DEC_events)
+
+my_dispersal_extirpationMatrix <- lemad_prepare_q_matrix(
+  object_a$all_area_combination,object_a$matrices_names,4,4)
+my_dispersal_extirpationMatrix
+
+## -----------------------------------------------------------------------------
+prepare_full_lambdas_vicariance(c(all_areas,"D"),num_max_multiregion,1,2,DEC_events)
+
+## -----------------------------------------------------------------------------
+# my_dispersal_extirpationMatrix[1,4] <- 0
+
+## -----------------------------------------------------------------------------
+initial_disperextirpation <- my_dispersal_extirpationMatrix
+
+## -----------------------------------------------------------------------------
 # condition_on_origin <- A
 
 ## -----------------------------------------------------------------------------
