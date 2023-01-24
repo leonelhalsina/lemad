@@ -12,7 +12,7 @@ vignette: >
 ## Introduction
 
 Our Lineage Extinction Model of Ancestral Distribution (LEMAD) computes the likelihood of the modern distribution of species (given the parameters of the model) where lineage extinction is a fundamental part of the calculation. LEMAD generalizes the likelihood described in GeoSSE for any number of areas and under several sets of geographic assumptions that facilitate its use in Ancestral Distribution Estimation (ADE). In LEMAD, the species’ geographic distribution changes over time in a similar manner as an evolving discrete trait does in SSE models. Lineages expand and contract their geographic distribution by colonising new regions and going locally extinct from others; these processes take place along the branches of the phylogenetic tree. LEMAD assumes that rates of speciation and extinction are constant across regions. DIVA and DEC are popular methods for ADE and they differ in the set of geographic assumptions (see below); in a LEMAD framework, we can use both DIVA and DEC sets of assumptions (we call them DIVAevents and DECevents). DIVAevents assumes that widespread species can split their ranges (vicariance) in any combination regardless the number of areas where daughter lineages inhabit (e.g., a species presents in region A, B, C and D can split in AB-CD or A-BCD; widespread vicariance sensu Matzke 2013) while DECevents assumes that one of the daughter lineages will be present at a single region (e.g., ABCD species splits in A-BCD or B-ACD; narrow vicariance). For in-situ speciation and in contrast with DIVAevents, DECevents allows that widespread species have a given population diverging from the rest, becoming a different species which coexists with the parental lineage e.g., ABCD species produces ABCD and the new species is restricted to A (in-situ subset hereafter; sympatry subset sensu Matzke 2013). 
-## SecSSE input files
+
 It could be convenient to remove all the objects in memory and then load LEMAD:
 ```{r}
 rm(list = ls())
@@ -101,7 +101,7 @@ DEC_events <- FALSE # to choose DIVAevents
 # or when choosing DECevents:
 # DEC_events <- TRUE 
 ```
-There are cases where the user wishes to define his/her own matrix of dispersal and extirpation events. Let us first see what the default matrix is like, we do that with the following lines:
+There are cases where the user wishes to define his/her own matrix of dispersal and extirpation events. If you do not need this, please skip this part and jumo to "Finally, we can incorporate information .....". Let us first see what the default matrix is like, we do that with the following lines:
 
 ```{r}
 object_a <- prepare_full_lambdas_vicariance(all_areas,num_max_multiregion,1,2,DEC_events)

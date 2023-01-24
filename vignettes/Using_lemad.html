@@ -12,7 +12,7 @@
 
 <meta name="author" content="Leonel Herrera-Alsina" />
 
-<meta name="date" content="2022-12-07" />
+<meta name="date" content="2023-01-24" />
 
 <title>Using LEMAD</title>
 
@@ -333,7 +333,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Using LEMAD</h1>
 <h4 class="author">Leonel Herrera-Alsina</h4>
-<h4 class="date">2022-12-07</h4>
+<h4 class="date">2023-01-24</h4>
 
 
 
@@ -365,8 +365,9 @@ DIVAevents, DECevents allows that widespread species have a given
 population diverging from the rest, becoming a different species which
 coexists with the parental lineage e.g., ABCD species produces ABCD and
 the new species is restricted to A (in-situ subset hereafter; sympatry
-subset sensu Matzke 2013). ## SecSSE input files It could be convenient
-to remove all the objects in memory and then load LEMAD:</p>
+subset sensu Matzke 2013).</p>
+<p>It could be convenient to remove all the objects in memory and then
+load LEMAD:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>())</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DDD)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lemad)</span></code></pre></div>
@@ -535,8 +536,10 @@ use the variable:</p>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co"># or when choosing DECevents:</span></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># DEC_events &lt;- TRUE </span></span></code></pre></div>
 <p>There are cases where the user wishes to define his/her own matrix of
-dispersal and extirpation events. Let us first see what the default
-matrix is like, we do that with the following lines:</p>
+dispersal and extirpation events. If you do not need this, please skip
+this part and jumo to “Finally, we can incorporate information …..”. Let
+us first see what the default matrix is like, we do that with the
+following lines:</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>object_a <span class="ot">&lt;-</span> <span class="fu">prepare_full_lambdas_vicariance</span>(all_areas,num_max_multiregion,<span class="dv">1</span>,<span class="dv">2</span>,DEC_events)</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>my_dispersal_extirpationMatrix <span class="ot">&lt;-</span> <span class="fu">lemad_prepare_q_matrix</span>(</span>
