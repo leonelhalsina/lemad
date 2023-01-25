@@ -10,9 +10,13 @@ To install the R package LEMAD, make sure you have devtools installed and then t
 library(devtools)
 remotes::install_github("leonelhalsina/lemad")
 ```
+### If installation gives you a hard time:
 It is likely that the latest Rtools needs to be installed.
 We recommend to have the latest R (it works perfectly with R 4.2.1).
 Also, package rgal might cause issues.
+
+For MAC users, it is being reported that installing gfortran 11.2 could
+be useful. 
 
 
 ### Using Lemad
