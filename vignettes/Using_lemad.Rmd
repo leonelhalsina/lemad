@@ -150,7 +150,7 @@ output_vig <- lemad_analysis(
  lineage_extinction = lineage_extinction,
  initial_lambda = initial_lambda,
  initial_disperextirpation = initial_disperextirpation,
- optimizer <- optimizer)
+ optimizer = optimizer)
 
 ```
 This vignette runs the analysis itself. You will see all the loglik values that are tried out during the optimization.That is what you normally see in your console when running an analysis. I will now show what the output is like.

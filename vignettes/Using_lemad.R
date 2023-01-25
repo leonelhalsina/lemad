@@ -93,7 +93,7 @@ output_vig <- lemad_analysis(
  lineage_extinction = lineage_extinction,
  initial_lambda = initial_lambda,
  initial_disperextirpation = initial_disperextirpation,
- optimizer <- optimizer)
+ optimizer = optimizer)
 
 
 ## -----------------------------------------------------------------------------
