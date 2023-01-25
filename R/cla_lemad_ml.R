@@ -10,6 +10,7 @@
 #' @param lineage_extinction set "free" to have it estimated or provide a rate to fix it at.
 #' @param initial_lambda Vector of length 2 for initial in-situ and vicariance rates to start the ML search. If NULL, the starting lambda will be taken from a Birth-death process.
 #' @param initial_disperextirpation Intial values for dispersal-local extinction during the ML search. If NULL, it will be equal to lambda/5. For advanced analysis, it can take a transition matrix to allow or restrict certain dispersal or extirpation events. See vignette
+#' @param optimizer two algorithms for maximazing the likelihood to choose from: "simplex" (default) and "subplex". 
 #' @return List with model's loglik, number of free parameters, estimates of rates, and ancestral locations probabilities.
 #' @examples
 #'# Example of how to set the arguments for a Maximum Likelihood search.
@@ -25,6 +26,7 @@
 #'missing_spp_areas <- list()
 #'missing_spp_areas[[1]] <- c("A","AC")
 #'missing_spp_areas[[2]] <- c(0.8,0.95)
+#'optimizer <- "simplex"
 #'
 #'output <- lemad_analysis(
 #'phylotree_recons,
@@ -36,7 +38,8 @@
 #'missing_spp_areas,
 #'lineage_extinction =  0.005,
 #'initial_lambda = NULL,
-#'initial_disperextirpation = NULL
+#'initial_disperextirpation = NULL,
+#'optimizer <- optimizer
 #')
 #' 
 #' output$model_ml #  -9.893469 the loglikelihood for the model
@@ -48,7 +51,8 @@ lemad_analysis <- function(phylotree_recons,species_presence,areas,num_max_multi
                            missing_spp_areas,
                            lineage_extinction = "free",
                            initial_lambda = NULL,
-                           initial_disperextirpation = NULL){
+                           initial_disperextirpation = NULL,
+                           optimizer = "simplex"){
   
   most_widespread_spp <- max(nchar(species_presence),na.rm = TRUE)
   
@@ -231,7 +235,7 @@ if(class(num_max_multiregion[2]) == "character"){ # area with no modern species
   tol <- c(1e-04, 1e-05, 1e-07)
   maxiter <- 1000 * round((1.25) ^ length(idparsopt))
   methode <- "ode45"
-  optimmethod <- "subplex" # "simplex""   subplex"
+  optimmethod <- optimizer # "simplex""   subplex"
   cond <- "proper_cond"
   
   if(is.null(condition_on_origin)){
@@ -261,7 +265,7 @@ if(class(num_max_multiregion[2]) == "character"){ # area with no modern species
     sampling_fraction,
     tol = c(1e-04, 1e-05, 1e-07),
     maxiter = 1000 * round((1.25)^length(idparsopt)),
-    optimmethod = "simplex",
+    optimmethod = optimmethod,
     num_cycles = 1, 
     loglik_penalty = 0, 
     is_complete_tree = is_complete_tree, 

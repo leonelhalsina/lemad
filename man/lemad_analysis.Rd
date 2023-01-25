@@ -14,7 +14,8 @@ lemad_analysis(
   missing_spp_areas,
   lineage_extinction = "free",
   initial_lambda = NULL,
-  initial_disperextirpation = NULL
+  initial_disperextirpation = NULL,
+  optimizer = "simplex"
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ lemad_analysis(
 \item{initial_lambda}{Vector of length 2 for initial in-situ and vicariance rates to start the ML search. If NULL, the starting lambda will be taken from a Birth-death process.}
 
 \item{initial_disperextirpation}{Intial values for dispersal-local extinction during the ML search. If NULL, it will be equal to lambda/5. For advanced analysis, it can take a transition matrix to allow or restrict certain dispersal or extirpation events. See vignette}
+
+\item{optimizer}{two algorithms for maximazing the likelihood to choose from: "simplex" (default) and "subplex".}
 }
 \value{
 List with model's loglik, number of free parameters, estimates of rates, and ancestral locations probabilities.
@@ -58,6 +61,7 @@ DEC_events <- FALSE
 missing_spp_areas <- list()
 missing_spp_areas[[1]] <- c("A","AC")
 missing_spp_areas[[2]] <- c(0.8,0.95)
+optimizer <- "simplex"
 
 output <- lemad_analysis(
 phylotree_recons,
@@ -69,7 +73,8 @@ DEC_events,
 missing_spp_areas,
 lineage_extinction =  0.005,
 initial_lambda = NULL,
-initial_disperextirpation = NULL
+initial_disperextirpation = NULL,
+optimizer <- optimizer
 )
 
 output$model_ml #  -9.893469 the loglikelihood for the model

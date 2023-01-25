@@ -79,6 +79,9 @@ initial_disperextirpation <- my_dispersal_extirpationMatrix
 condition_on_origin <- NULL
 
 ## -----------------------------------------------------------------------------
+optimizer <- "simplex"
+
+## -----------------------------------------------------------------------------
 output_vig <- lemad_analysis(
  phylotree_recons,
  species_presence,
@@ -89,7 +92,8 @@ output_vig <- lemad_analysis(
  missing_spp_areas = missing_spp_areas,
  lineage_extinction = lineage_extinction,
  initial_lambda = initial_lambda,
- initial_disperextirpation = initial_disperextirpation)
+ initial_disperextirpation = initial_disperextirpation,
+ optimizer <- optimizer)
 
 
 ## -----------------------------------------------------------------------------

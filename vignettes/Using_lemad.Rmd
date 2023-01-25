@@ -133,6 +133,10 @@ Finally, we can incorporate information on the distribution of the common ancest
 ```{r}
 condition_on_origin <- NULL
 ```
+We can specify what optimizer (i.e., algorithm to maximize the likelihood) lemad will use:
+```{r}
+optimizer <- "simplex"
+```
 To launch the analysis:
 ```{r}
 output_vig <- lemad_analysis(
@@ -145,7 +149,8 @@ output_vig <- lemad_analysis(
  missing_spp_areas = missing_spp_areas,
  lineage_extinction = lineage_extinction,
  initial_lambda = initial_lambda,
- initial_disperextirpation = initial_disperextirpation)
+ initial_disperextirpation = initial_disperextirpation,
+ optimizer <- optimizer)
 
 ```
 This vignette runs the analysis itself. You will see all the loglik values that are tried out during the optimization.That is what you normally see in your console when running an analysis. I will now show what the output is like.
