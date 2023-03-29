@@ -4,7 +4,7 @@ Title: Lineage Extinction Model of Ancestral Distribution
 Version: 2.1.1
 Date: 2022-11-08
 License: GPL-3
-Authors@R: person("Leonel", "Herrera Alsina", email = "leonelhalsina@gmail.com", role = "cre")
+Authors@R: person("Leonel", "Herrera-Alsina", email = "leonelhalsina@gmail.com", role = "cre")
 Description: Reconstructs ancestral distributions while considering lineage extinction
 Depends: R (>= 3.5.0)
 Imports: utils,
