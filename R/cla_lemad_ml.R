@@ -53,7 +53,7 @@ lemad_analysis <- function(phylotree_recons,species_presence,areas,num_max_multi
                            initial_lambda = NULL,
                            initial_disperextirpation = NULL,
                            optimizer = "simplex"){
-  
+  areas <- sort(areas)
   most_widespread_spp <- max(nchar(species_presence),na.rm = TRUE)
   
   unique_areas_tocheck <- sort(unique(unlist(strsplit(species_presence, split = ""))))
@@ -309,8 +309,7 @@ if(class(num_max_multiregion[2]) == "character"){ # area with no modern species
                                              "odeint::runge_kutta_fehlberg78"),
                              atol = 1e-16,
                              rtol = 1e-16)
-  
-  
+
   ancestral_states <- output$ancestral_states
   colnames(ancestral_states) <- give_me_states_combination(areas,num_max_multiregion[1])
   
