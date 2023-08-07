@@ -51,6 +51,7 @@ Maximum likehood search under Lineage Extinction Model of Ancestral Distribution
 # Example of how to set the arguments for a Maximum Likelihood search.
 library(lemad)
 library(DDD)
+library(phytools)
 areas <- c("A", "B", "C")
 set.seed(4)
 phylotree_recons <- ape::rcoal(4, tip.label = 1:4)
@@ -74,8 +75,9 @@ missing_spp_areas,
 lineage_extinction =  0.005,
 initial_lambda = NULL,
 initial_disperextirpation = NULL,
-optimizer <- optimizer
+optimizer = optimizer
 )
 
 output$model_ml #  -9.893469 the loglikelihood for the model
+You can use this output in the plotting function: plot_biogeo_reconst()
 }

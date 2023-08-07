@@ -16,6 +16,7 @@
 #'# Example of how to set the arguments for a Maximum Likelihood search.
 #'library(lemad)
 #'library(DDD)
+#'library(phytools)
 #'areas <- c("A", "B", "C")
 #'set.seed(4)
 #'phylotree_recons <- ape::rcoal(4, tip.label = 1:4)
@@ -39,10 +40,11 @@
 #'lineage_extinction =  0.005,
 #'initial_lambda = NULL,
 #'initial_disperextirpation = NULL,
-#'optimizer <- optimizer
+#'optimizer = optimizer
 #')
 #' 
 #' output$model_ml #  -9.893469 the loglikelihood for the model
+#' You can use this output in the plotting function: plot_biogeo_reconst()
 #' @export
 
 lemad_analysis <- function(phylotree_recons,species_presence,areas,num_max_multiregion,

@@ -18,6 +18,7 @@ It could be convenient to remove all the objects in memory and then load LEMAD:
 rm(list = ls())
 library(DDD)
 library(lemad)
+library(phytools)
 ```
 Similar to the DIVA, DEC, BioGeoBears,LEMAD uses two input files: 1) a rooted, ultrametric tree in nexus format (for conversion of other formats to nexus, we refer to the documentation in package 'ape') and 2) a data file with geographic information. This file will have two columns, the first containing taxa names (which should match the names in the phylogeny) and the second a  code for the region where each species inhabits (usually A,B,C, etc., but notice that 'NA' is a valid code too, if you are not sure about the distribution of that species). A comma-separated value file (.csv) generated in MsExcel works particularly well. The *.csv file can be loaded into R using the read.csv() function. In this vignette, we are loading R objects (using the function data()) instead of nexus trees or csv files as it was better to handle when building this vignette document. But, we provide a line commented out on how to the file uploading should be done:
 ```{r}
@@ -168,5 +169,22 @@ output$ancestral_states will provide the probability of each ancestor (internal 
 ```{r}
 head(output_vig$ancestral_states)
 ```
-Those are the probabilities for the internal nodes 67, 68 up to 72. Now, one can use a function to plot those values into our phylogenetic tree (function not provided in LEMAD yet, but soon ).
+Those are the probabilities for the internal nodes 67, 68 up to 72. Now, one can use a function to plot those values into our phylogenetic tree.
+Lemad provides a function to plot your results. It is by no means intended to be the ultimate plotting function, but it is useful to see right away what our results look like. In LEMAD, we use output_vig$ancestral_states for this. This object is a table where the rownames are the id for the nodes in our tree. In columns, it is shown the probability of each one being at each region in our system. We cab see that, for node with ID 67, the probability of being in area A is 0.268, being at B is 0.284 and so forth. Because sometimes the nodes in a tree are labelled in an unconventional way, I recommend to first plot our tree and see the node ID:
+```{r}
+plot.phylo(phylotree_recons,show.tip.label=F)
+nodelabels()
+```
+We can now see that the id for the root node is 67, which matches the first row in our output_vig$ancestral_states, so we can carry on. The plotting function will take the same objects that the ones used for the main analysis. We just need to add the colors we choose. The order of the colors should be in the order we have the all_areas vector.
+```{r}
+colors_for_pie <-  c("blue","red","green")
+probabilities_at_node <- output_vig$ancestral_states
+plot_biogeo_reconst(probabilities_at_node,
+                     num_max_multiregion,           
+                                all_areas,
+                                phylotree_recons,
+                                species_presence,
+                                colors_for_pie)
+```
+Note that when ancestors are reconstructed to be present in one area, the node will be plotted in a solid color matching "colors_for_pie".However, when the ancestor is reconstructed to have had a multi-area distribution, the node will like like a pie chart. If two colors are shown, it means that the ancestor was present in BOTH areas, NOT that there was the same probability of being present in either area.
 

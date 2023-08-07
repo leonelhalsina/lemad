@@ -1,3 +1,104 @@
+#' Plotting the geographic distribution of ancestors under Lineage Extinction Model of Ancestral Distribution (LEMAD) 
+#' @title Plotting the most likely distribution of lineages
+#' @param probabilities_at_node table coming from the output in lemad_analysis function which shows for each node, the probabilities being at each area.
+#' @param num_max_multiregion indicates the maximum number of regions a lineage can possible take at a given point in time. It can go from 2 to length(areas). Alternatively, it can be a vector of length 2: first element to be the maximum number of regions and the second a letter that represents "without any modern species" e.g.,num_max_multiregion = c(3,"D"). See vignette  
+#' @param areas a vector of colors that should match the length and order than areas
+#' @param phylotree_recons phylogenetic tree of class phylo, ultrametric, rooted and with branch lengths.
+#' @param species_presence a vector (of class character) with regions for each species. Coded in letters: "C"  "A"  "C"  "C" . Same order than tree tips
+#' @param colors_for_pie A vector If NULL, the conditioning on the crown origin follows Herrera-Alsina et al. 2019 (Syst. Biol.). But the user can provide the hypothesized root state: condition_on_origin <- "A"
+#' @return Phylogenetic tree with nodes showing the distribution of ancestors. Note that pie-chart-looking nodes mean that the ancestor at that node was present in more than one area/region.
+#' @note The arguments to run this function must be the same that used in the lemad_analysis() function. Be aware that this function will take the first row of lemad_analysis's output to be the probabilities at the root of the tree. The second row will be the next node towards the present and so forth. So, please plot your tree, use nodelabels() to see the id for the nodes to make sure that the id of the root node is the first one that appears in rownames(output$ancestral_states).
+#' @examples 
+#'library(lemad)
+#'library(DDD)
+#'library(phytools)
+#'probabilities_at_node <- as.matrix(rbind(c( 6.758576e-04, 8.187948e-04, 4.317367e-04, 2.153787e-01, 0.04086306, 2.134987e-01, 0.52833311),
+#'c(9.144146e-03, 2.712806e-05, 9.061548e-03, 3.677319e-02, 0.67208318, 3.660673e-02, 0.23630408),
+#'c(1.414608e-06, 1.818247e-11, 6.972226e-07, 2.572815e-05, 0.98590677, 2.572378e-05, 0.01403967)))
+#'
+#'
+#'colnames(probabilities_at_node) <- c("A","B","C","AB","AC","BC","ABC")
+#'rownames(probabilities_at_node) <- c("5","6","7")
+#'# I prepare in this example probabilities_at_node, which is in fact, an object that comes from lemad_analysis output (in fact it is output$ancestral_states)
+#'areas <- c("A", "B", "C")
+#'set.seed(4)
+#'phylotree_recons <- ape::rcoal(4, tip.label = 1:4)
+#'species_presence <- c("B","C","A","AC")
+#'num_max_multiregion <- 3
+#'colors_for_pie <-  c("blue","red","green") # the same order than areas
+#'plot_biogeo_reconst(probabilities_at_node,
+#'num_max_multiregion,
+#'areas,
+#'phylotree_recons,
+#'species_presence,
+#'colors_for_pie)
+#'
+#'#Note that when ancestors are reconstructed to be present in one area, the node will be plotted in a solid color matching "colors_for_pie".
+#'#However, when the ancestor is reconstructed to have had a multi-area distribution, the node will like like a pie chart. If two colors are shown,
+#'#it means that the ancestor was present in BOTH areas, NOT that there was the same probability of being present in either area.
+#'
+#' @export
+plot_biogeo_reconst <- function(probabilities_at_node,
+                                num_max_multiregion,
+                                areas,
+                                phylotree_recons,
+                                species_presence,
+                                colors_for_pie){
+  highest_prob_state_lemad <- NULL
+  tip_state <- species_presence
+  
+  all_areas <- areas
+  
+  ##### trying using the pie argument, to make easy the plotting of multi-area lineages
+  
+  all_states <- give_me_states_combination(all_areas,num_max_multiregion)
+  
+  num_probabilities_at_node <- nrow(probabilities_at_node)
+  for(ij in 1:num_probabilities_at_node){
+    
+    id_order_state_highest <- which(max(probabilities_at_node[ij,])==probabilities_at_node[ij,])
+    id_order_state_highest <- id_order_state_highest[1]
+    # cat(id_order_state_highest,"\n")
+    highest_prob_state_lemad <- c(highest_prob_state_lemad,all_states[id_order_state_highest])
+  }
+  tip_and_internal_nodes <- c(tip_state,highest_prob_state_lemad)
+  matrix_colors <- matrix(0,nrow = length(tip_and_internal_nodes),ncol = length(all_areas))
+  colnames(matrix_colors) <- all_areas
+  for(ij in 1:length(tip_and_internal_nodes)){
+    this_tip_state <- tip_and_internal_nodes[ij]
+    
+    for(IJ in 1:nchar(this_tip_state)){
+      number_to_accomodate <- 1/nchar(this_tip_state)
+      find_this_state <- substr(this_tip_state,IJ,IJ)
+      this_column <- which(colnames(matrix_colors) == find_this_state)
+      matrix_colors[ij,this_column] <- number_to_accomodate
+    }
+    
+  }
+  
+  plot.phylo(phylotree_recons,show.tip.label = FALSE,
+             main="example",cex=0.6,label.offset=0.7)
+  
+  nodes_matrix_colors <- matrix_colors[(length(tip_state)+1):nrow(matrix_colors),]
+  
+  nodelabels(pie = nodes_matrix_colors , 
+             piecol=colors_for_pie ,
+             cex=0.7)
+  
+  
+  tips_matrix_colors <- matrix_colors[1:length(tip_state),]
+  
+  tiplabels(pie = tips_matrix_colors, 
+            piecol= colors_for_pie,
+            cex=0.7)
+  
+  
+  
+  
+  warning("see the note on the node id order")
+}
+
+
 
 lemad_id_paramPos <- function(traits,num_concealed_states){
   idparslist <- list()

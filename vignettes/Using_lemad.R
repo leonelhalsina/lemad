@@ -2,6 +2,7 @@
 rm(list = ls())
 library(DDD)
 library(lemad)
+library(phytools)
 
 ## -----------------------------------------------------------------------------
 # amazilia_distribution <- read.csv(file="humm_distribution.csv")
@@ -105,4 +106,18 @@ output_vig$estimated_rates
 
 ## -----------------------------------------------------------------------------
 head(output_vig$ancestral_states)
+
+## -----------------------------------------------------------------------------
+plot.phylo(phylotree_recons,show.tip.label=F)
+nodelabels()
+
+## -----------------------------------------------------------------------------
+colors_for_pie <-  c("blue","red","green")
+probabilities_at_node <- output_vig$ancestral_states
+plot_biogeo_reconst(probabilities_at_node,
+                     num_max_multiregion,           
+                                all_areas,
+                                phylotree_recons,
+                                species_presence,
+                                colors_for_pie)
 

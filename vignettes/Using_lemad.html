@@ -12,7 +12,7 @@
 
 <meta name="author" content="Leonel Herrera-Alsina" />
 
-<meta name="date" content="2023-01-25" />
+<meta name="date" content="2023-08-07" />
 
 <title>Using LEMAD</title>
 
@@ -121,13 +121,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
   for (var i = 0; i < sheets.length; i++) {
     if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
     try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    for (var j = 0; j < rules.length; j++) {
+    var j = 0;
+    while (j < rules.length) {
       var rule = rules[j];
       // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -333,7 +340,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Using LEMAD</h1>
 <h4 class="author">Leonel Herrera-Alsina</h4>
-<h4 class="date">2023-01-25</h4>
+<h4 class="date">2023-08-07</h4>
 
 
 
@@ -368,9 +375,12 @@ the new species is restricted to A (in-situ subset hereafter; sympatry
 subset sensu Matzke 2013).</p>
 <p>It could be convenient to remove all the objects in memory and then
 load LEMAD:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>())</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DDD)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lemad)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>())</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(DDD)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(lemad)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">library</span>(phytools)</span></code></pre></div>
+<pre><code>## Loading required package: ape</code></pre>
+<pre><code>## Loading required package: maps</code></pre>
 <p>Similar to the DIVA, DEC, BioGeoBears,LEMAD uses two input files: 1)
 a rooted, ultrametric tree in nexus format (for conversion of other
 formats to nexus, we refer to the documentation in package ‘ape’) and 2)
@@ -385,9 +395,9 @@ read.csv() function. In this vignette, we are loading R objects (using
 the function data()) instead of nexus trees or csv files as it was
 better to handle when building this vignette document. But, we provide a
 line commented out on how to the file uploading should be done:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># amazilia_distribution &lt;- read.csv(file=&quot;humm_distribution.csv&quot;)</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(distributioninfo)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(amazilia_distribution)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># amazilia_distribution &lt;- read.csv(file=&quot;humm_distribution.csv&quot;)</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">data</span>(distributioninfo)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="fu">head</span>(amazilia_distribution)</span></code></pre></div>
 <pre><code>##                 species region
 ## 1     Amazilia_amabilis     AB
 ## 2     Amazilia_amazilia      A
@@ -403,19 +413,19 @@ to indicate it is with “AB”.</p>
 is rooted and has labeled tips. One can load it in R by using
 read.nexus(). In our example we load a prepared phylogeny named
 “phylo_Vign”:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># amazilia_tree &lt;- read.nexus(&quot;amazilia_phylo.nex&quot;) # example of how to load a tree</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;phylo_Vign2&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># amazilia_tree &lt;- read.nexus(&quot;amazilia_phylo.nex&quot;) # example of how to load a tree</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;phylo_Vign2&quot;</span>)</span></code></pre></div>
 <p>To run LEMAD it is important that tree tip labels agree with taxon
 names in the distribution file, but also that these are in the same
 order. To that end, we run the following piece of code prior to any
 analysis:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(amazilia_distribution) <span class="ot">&lt;-</span> amazilia_distribution<span class="sc">$</span>species</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>geiger<span class="sc">:::</span><span class="fu">name.check</span>(amazilia_tree, amazilia_distribution, <span class="at">data.names=</span><span class="cn">NULL</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">rownames</span>(amazilia_distribution) <span class="ot">&lt;-</span> amazilia_distribution<span class="sc">$</span>species</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>geiger<span class="sc">:::</span><span class="fu">name.check</span>(amazilia_tree, amazilia_distribution, <span class="at">data.names=</span><span class="cn">NULL</span>)</span></code></pre></div>
 <pre><code>## [1] &quot;OK&quot;</code></pre>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>amazilia_distribution<span class="sc">$</span>region <span class="ot">&lt;-</span> <span class="fu">toupper</span>(amazilia_distribution<span class="sc">$</span>region)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>amazilia_distribution <span class="ot">&lt;-</span> amazilia_distribution[<span class="fu">order</span>(<span class="fu">match</span>(amazilia_distribution<span class="sc">$</span>species,amazilia_tree<span class="sc">$</span>tip.label)),]</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>(amazilia_distribution<span class="sc">$</span>species) <span class="sc">==</span> (amazilia_tree<span class="sc">$</span>tip.label)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>amazilia_distribution<span class="sc">$</span>region <span class="ot">&lt;-</span> <span class="fu">toupper</span>(amazilia_distribution<span class="sc">$</span>region)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>amazilia_distribution <span class="ot">&lt;-</span> amazilia_distribution[<span class="fu">order</span>(<span class="fu">match</span>(amazilia_distribution<span class="sc">$</span>species,amazilia_tree<span class="sc">$</span>tip.label)),]</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>(amazilia_distribution<span class="sc">$</span>species) <span class="sc">==</span> (amazilia_tree<span class="sc">$</span>tip.label)</span></code></pre></div>
 <pre><code>##  [1] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
 ## [16] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
 ## [31] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
@@ -425,18 +435,18 @@ analysis:</p>
 phylogenic tree and species distribution object match each other. Now
 that our phylogenetic tree and species distribution are working fine, we
 declare these variables for simplicity:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>phylotree_recons <span class="ot">&lt;-</span> amazilia_tree</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>species_presence <span class="ot">&lt;-</span> amazilia_distribution<span class="sc">$</span>region</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>phylotree_recons <span class="ot">&lt;-</span> amazilia_tree</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>species_presence <span class="ot">&lt;-</span> amazilia_distribution<span class="sc">$</span>region</span></code></pre></div>
 <p>If the letters that are coding the distribution of species is
 unsorted (e.g., BAC instead of ABC), we can run the following lines to
 solve it.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#for(ik in 1:length(species_presence)){</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co">#  string_to_sort &lt;- species_presence[ik]</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">#  species_presence[ik] &lt;- paste(sort(unlist(strsplit(string_to_sort, &quot;&quot;))), collapse = &quot;&quot;)</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">#}</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co">#for(ik in 1:length(species_presence)){</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="co">#  string_to_sort &lt;- species_presence[ik]</span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#  species_presence[ik] &lt;- paste(sort(unlist(strsplit(string_to_sort, &quot;&quot;))), collapse = &quot;&quot;)</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#}</span></span></code></pre></div>
 <p>We need to specify that our analysis will have three region. We do
 not have to specify all the multi-region combinations.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>all_areas <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;A&quot;</span>,<span class="st">&quot;B&quot;</span>,<span class="st">&quot;C&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>all_areas <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;A&quot;</span>,<span class="st">&quot;B&quot;</span>,<span class="st">&quot;C&quot;</span>)</span></code></pre></div>
 <p>Many datasets are not perfect and we have to learn to live with that.
 Because LEMAD considers the lineages that went extinct (i.e., missing
 branches) into the analysis, if our phylogenetic tree is incomplete
@@ -451,9 +461,9 @@ species living in both. All species living region C are present in the
 tree, also all the species living in AC or BC, etc. We set the following
 list to set the regions that are incomplete (regions whose inhabitants
 are all present in the tree, do not have to be specified)</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>missing_spp_areas <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>missing_spp_areas[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;A&quot;</span>,<span class="st">&quot;B&quot;</span>,<span class="st">&quot;AB&quot;</span>)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>missing_spp_areas[[<span class="dv">2</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.8</span>,<span class="fl">0.57</span>,<span class="fl">0.83</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>missing_spp_areas <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>missing_spp_areas[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;A&quot;</span>,<span class="st">&quot;B&quot;</span>,<span class="st">&quot;AB&quot;</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>missing_spp_areas[[<span class="dv">2</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.8</span>,<span class="fl">0.57</span>,<span class="fl">0.83</span>)</span></code></pre></div>
 <p>Notice that the order of the second list object should match that of
 the first list object. We need to set what is the maximum number of
 areas where a species can take at a given point in time. This means, the
@@ -464,7 +474,7 @@ three regions at the present. So, it might be safe to assume that
 ancestors could achieve the same. In datasets with more regions, one
 should make a decision whether a species can be truly “cosmopolitan” or
 not.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>num_max_multiregion <span class="ot">&lt;-</span> <span class="dv">3</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>num_max_multiregion <span class="ot">&lt;-</span> <span class="dv">3</span></span></code></pre></div>
 <p>By doing that line, we are saying that lineages can be present in:
 “A” “B” “C” “AB” “AC” “BC” “ABC” Now, let’s imagine that we have four
 regions (A,B,C,D) and we still think that the maximum number of regions
@@ -503,9 +513,9 @@ model. When fixing the model to a different extinction rate, the
 likelihood could be different. By comparing both results, we will know
 which model is supported better. Also, we can let the extinction rate be
 estimated during the calculation. To do that we use the argument:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#lineage_extinction &lt;- &quot;free&quot;</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>lineage_extinction <span class="ot">&lt;-</span> <span class="fl">0.001</span></span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co">#lineage_extinction &lt;- &quot;free&quot;</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="co"># or</span></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>lineage_extinction <span class="ot">&lt;-</span> <span class="fl">0.001</span></span></code></pre></div>
 <p>Before starting the optimization (Maximum likelihood search, which
 will find the combinations of rates that fit best), we can provide of
 “initial values”. The search algorithm needs to start calculating the
@@ -514,8 +524,8 @@ rates that are slightly lower or higher, calculate the likelihood and
 check whether those likelihoods are better than the resulting one from
 the previous parameter combination. This makes the algorithm decide
 which direction to take.</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>initial_lambda <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.01</span>,<span class="fl">0.01</span>)</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>initial_disperextirpation <span class="ot">&lt;-</span> <span class="fl">0.002</span></span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>initial_lambda <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.01</span>,<span class="fl">0.01</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>initial_disperextirpation <span class="ot">&lt;-</span> <span class="fl">0.002</span></span></code></pre></div>
 <p>Those lines are saying that we want to start the ML search where
 speciation is 0.01 and the rate of colonizing and disappearing from
 regions is 0.002. Note that the initial lambda is a vector of length 2
@@ -532,19 +542,19 @@ Introduction). Because they are different parameterizations of the same
 model, the comparison of their likelihoods is valid and straightforward
 so data will inform which set of assumptions is more likely. We need to
 use the variable:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>DEC_events <span class="ot">&lt;-</span> <span class="cn">FALSE</span> <span class="co"># to choose DIVAevents</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co"># or when choosing DECevents:</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># DEC_events &lt;- TRUE </span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>DEC_events <span class="ot">&lt;-</span> <span class="cn">FALSE</span> <span class="co"># to choose DIVAevents</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="co"># or when choosing DECevents:</span></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="co"># DEC_events &lt;- TRUE </span></span></code></pre></div>
 <p>There are cases where the user wishes to define his/her own matrix of
 dispersal and extirpation events. If you do not need this, please skip
 this part and jumo to “Finally, we can incorporate information …..”. Let
 us first see what the default matrix is like, we do that with the
 following lines:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>object_a <span class="ot">&lt;-</span> <span class="fu">prepare_full_lambdas_vicariance</span>(all_areas,num_max_multiregion,<span class="dv">1</span>,<span class="dv">2</span>,DEC_events)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>my_dispersal_extirpationMatrix <span class="ot">&lt;-</span> <span class="fu">lemad_prepare_q_matrix</span>(</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  object_a<span class="sc">$</span>all_area_combination,object_a<span class="sc">$</span>matrices_names,<span class="dv">4</span>,<span class="dv">4</span>)</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>my_dispersal_extirpationMatrix</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>object_a <span class="ot">&lt;-</span> <span class="fu">prepare_full_lambdas_vicariance</span>(all_areas,num_max_multiregion,<span class="dv">1</span>,<span class="dv">2</span>,DEC_events)</span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>my_dispersal_extirpationMatrix <span class="ot">&lt;-</span> <span class="fu">lemad_prepare_q_matrix</span>(</span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>  object_a<span class="sc">$</span>all_area_combination,object_a<span class="sc">$</span>matrices_names,<span class="dv">4</span>,<span class="dv">4</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>my_dispersal_extirpationMatrix</span></code></pre></div>
 <pre><code>##      A  B  C AB AC BC ABC
 ## A   NA  0  0  4  4  0   0
 ## B    0 NA  0  4  0  4   0
@@ -555,7 +565,7 @@ following lines:</p>
 ## ABC  0  0  0  4  4  4  NA</code></pre>
 <p>If you are setting up an analysis that includes “a region with no
 modern species in”, you might need to use</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prepare_full_lambdas_vicariance</span>(<span class="fu">c</span>(all_areas,<span class="st">&quot;D&quot;</span>),num_max_multiregion,<span class="dv">1</span>,<span class="dv">2</span>,DEC_events)</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fu">prepare_full_lambdas_vicariance</span>(<span class="fu">c</span>(all_areas,<span class="st">&quot;D&quot;</span>),num_max_multiregion,<span class="dv">1</span>,<span class="dv">2</span>,DEC_events)</span></code></pre></div>
 <pre><code>## $all_matrices
 ## $all_matrices$A
 ##     A B C D AB AC AD BC BD CD ABC ABD ACD BCD
@@ -810,12 +820,12 @@ modern species in”, you might need to use</p>
 Now, we can call my_dispersal_extirpationMatrix and edit as we wish.
 Notice that we use the number 4 to indicate what movements/transitions
 are possible and 0 for those that are not. To edit, you could do:</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># my_dispersal_extirpationMatrix[1,4] &lt;- 0</span></span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="co"># my_dispersal_extirpationMatrix[1,4] &lt;- 0</span></span></code></pre></div>
 <p>Remember that the main diagonal should keep NAs. Please make sure
 that after editing, the following expression
 class(my_dispersal_extirpationMatrix) retrieves “matrix” “array”. The
 last step is to do:</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>initial_disperextirpation <span class="ot">&lt;-</span> my_dispersal_extirpationMatrix</span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a>initial_disperextirpation <span class="ot">&lt;-</span> my_dispersal_extirpationMatrix</span></code></pre></div>
 <p>In summary, initial_disperextirpation can 1) be NULL (lemad will take
 1/5 of initial lambda to start the optimization), 2) be a number
 provided by the user (lemad will start the optimization from this value)
@@ -825,26 +835,26 @@ case the optimization will start in a value 1/5 lambda).</p>
 common ancestor of the whole clade. So, LEMAD will compute the
 likelihood conditioned on the information we provided. To indicate that
 the very first ancestor of the clade was present in area A, We do:</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># condition_on_origin &lt;- A</span></span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="co"># condition_on_origin &lt;- A</span></span></code></pre></div>
 <p>Generally, we lack this information so we normally want LEMAD not to
 condition on a particular area. We do:</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>condition_on_origin <span class="ot">&lt;-</span> <span class="cn">NULL</span></span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>condition_on_origin <span class="ot">&lt;-</span> <span class="cn">NULL</span></span></code></pre></div>
 <p>We can specify what optimizer (i.e., algorithm to maximize the
 likelihood) lemad will use:</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>optimizer <span class="ot">&lt;-</span> <span class="st">&quot;simplex&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>optimizer <span class="ot">&lt;-</span> <span class="st">&quot;simplex&quot;</span></span></code></pre></div>
 <p>To launch the analysis:</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>output_vig <span class="ot">&lt;-</span> <span class="fu">lemad_analysis</span>(</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a> phylotree_recons,</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a> species_presence,</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a> <span class="at">areas =</span> all_areas,</span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a> num_max_multiregion,</span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a> condition_on_origin,</span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a> DEC_events,</span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a> <span class="at">missing_spp_areas =</span> missing_spp_areas,</span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a> <span class="at">lineage_extinction =</span> lineage_extinction,</span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a> <span class="at">initial_lambda =</span> initial_lambda,</span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a> <span class="at">initial_disperextirpation =</span> initial_disperextirpation,</span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a> <span class="at">optimizer =</span> optimizer)</span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a>output_vig <span class="ot">&lt;-</span> <span class="fu">lemad_analysis</span>(</span>
+<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a> phylotree_recons,</span>
+<span id="cb28-3"><a href="#cb28-3" tabindex="-1"></a> species_presence,</span>
+<span id="cb28-4"><a href="#cb28-4" tabindex="-1"></a> <span class="at">areas =</span> all_areas,</span>
+<span id="cb28-5"><a href="#cb28-5" tabindex="-1"></a> num_max_multiregion,</span>
+<span id="cb28-6"><a href="#cb28-6" tabindex="-1"></a> condition_on_origin,</span>
+<span id="cb28-7"><a href="#cb28-7" tabindex="-1"></a> DEC_events,</span>
+<span id="cb28-8"><a href="#cb28-8" tabindex="-1"></a> <span class="at">missing_spp_areas =</span> missing_spp_areas,</span>
+<span id="cb28-9"><a href="#cb28-9" tabindex="-1"></a> <span class="at">lineage_extinction =</span> lineage_extinction,</span>
+<span id="cb28-10"><a href="#cb28-10" tabindex="-1"></a> <span class="at">initial_lambda =</span> initial_lambda,</span>
+<span id="cb28-11"><a href="#cb28-11" tabindex="-1"></a> <span class="at">initial_disperextirpation =</span> initial_disperextirpation,</span>
+<span id="cb28-12"><a href="#cb28-12" tabindex="-1"></a> <span class="at">optimizer =</span> optimizer)</span></code></pre></div>
 <pre><code>## You are optimizing lambda0 mu0 
 ## You are fixing lambda1 mu1 
 ## Optimizing the likelihood - this may take a while. 
@@ -1048,15 +1058,15 @@ likelihood) lemad will use:</p>
 values that are tried out during the optimization.That is what you
 normally see in your console when running an analysis. I will now show
 what the output is like.</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>output_vig<span class="sc">$</span>model_ml</span></code></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a>output_vig<span class="sc">$</span>model_ml</span></code></pre></div>
 <pre><code>## [1] -289.4372</code></pre>
-<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>output_vig<span class="sc">$</span>number_free_pars</span></code></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a>output_vig<span class="sc">$</span>number_free_pars</span></code></pre></div>
 <pre><code>## [1] 3</code></pre>
 <p>With the information from “output model_ml” and “output
 number_free_pars” we can compare across models using AIC. We can see the
 rates of the model, those are the rates that maximize the
 likelihood.</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>output_vig<span class="sc">$</span>estimated_rates</span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a>output_vig<span class="sc">$</span>estimated_rates</span></code></pre></div>
 <pre><code>##          in-situ       vicariance    disper-extirp Fixed_extinction 
 ##       0.25737000       0.02821474       0.15513222       0.00100000</code></pre>
 <p>In-situ speciation is estimated to be higher than vicariance. And,
@@ -1064,7 +1074,7 @@ extinction is fixed at 0.001 as we set it up. output$ancestral_states
 will provide the probability of each ancestor (internal node) being at
 each region (or combination of regions), here is the first lines of such
 an object:</p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(output_vig<span class="sc">$</span>ancestral_states)</span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a><span class="fu">head</span>(output_vig<span class="sc">$</span>ancestral_states)</span></code></pre></div>
 <pre><code>##            A         B         C         AB         AC         BC        ABC
 ## 67 0.2681845 0.2841608 0.2956525 0.03027358 0.03091100 0.03178615 0.05903146
 ## 68 0.2629808 0.2637889 0.2620855 0.02887410 0.02878072 0.02882493 0.12466507
@@ -1074,7 +1084,42 @@ an object:</p>
 ## 72 0.2752458 0.2808611 0.2335341 0.03048075 0.02786939 0.02815764 0.12385125</code></pre>
 <p>Those are the probabilities for the internal nodes 67, 68 up to 72.
 Now, one can use a function to plot those values into our phylogenetic
-tree (function not provided in LEMAD yet, but soon ).</p>
+tree. Lemad provides a function to plot your results. It is by no means
+intended to be the ultimate plotting function, but it is useful to see
+right away what our results look like. In LEMAD, we use
+output_vig$ancestral_states for this. This object is a table where the
+rownames are the id for the nodes in our tree. In columns, it is shown
+the probability of each one being at each region in our system. We cab
+see that, for node with ID 67, the probability of being in area A is
+0.268, being at B is 0.284 and so forth. Because sometimes the nodes in
+a tree are labelled in an unconventional way, I recommend to first plot
+our tree and see the node ID:</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" tabindex="-1"></a><span class="fu">plot.phylo</span>(phylotree_recons,<span class="at">show.tip.label=</span>F)</span>
+<span id="cb38-2"><a href="#cb38-2" tabindex="-1"></a><span class="fu">nodelabels</span>()</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- -->
+We can now see that the id for the root node is 67, which matches the
+first row in our output_vig$ancestral_states, so we can carry on. The
+plotting function will take the same objects that the ones used for the
+main analysis. We just need to add the colors we choose. The order of
+the colors should be in the order we have the all_areas vector.</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" tabindex="-1"></a>colors_for_pie <span class="ot">&lt;-</span>  <span class="fu">c</span>(<span class="st">&quot;blue&quot;</span>,<span class="st">&quot;red&quot;</span>,<span class="st">&quot;green&quot;</span>)</span>
+<span id="cb39-2"><a href="#cb39-2" tabindex="-1"></a>probabilities_at_node <span class="ot">&lt;-</span> output_vig<span class="sc">$</span>ancestral_states</span>
+<span id="cb39-3"><a href="#cb39-3" tabindex="-1"></a><span class="fu">plot_biogeo_reconst</span>(probabilities_at_node,</span>
+<span id="cb39-4"><a href="#cb39-4" tabindex="-1"></a>                     num_max_multiregion,           </span>
+<span id="cb39-5"><a href="#cb39-5" tabindex="-1"></a>                                all_areas,</span>
+<span id="cb39-6"><a href="#cb39-6" tabindex="-1"></a>                                phylotree_recons,</span>
+<span id="cb39-7"><a href="#cb39-7" tabindex="-1"></a>                                species_presence,</span>
+<span id="cb39-8"><a href="#cb39-8" tabindex="-1"></a>                                colors_for_pie)</span></code></pre></div>
+<pre><code>## Warning in plot_biogeo_reconst(probabilities_at_node, num_max_multiregion, :
+## see the note on the node id order</code></pre>
+<p><img src="data:image/png;base64,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" /><!-- -->
+Note that when ancestors are reconstructed to be present in one area,
+the node will be plotted in a solid color matching
+“colors_for_pie”.However, when the ancestor is reconstructed to have had
+a multi-area distribution, the node will like like a pie chart. If two
+colors are shown, it means that the ancestor was present in BOTH areas,
+NOT that there was the same probability of being present in either
+area.</p>
 </div>
 
 

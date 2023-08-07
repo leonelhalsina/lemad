@@ -24,7 +24,7 @@ NeedsCompilation: yes
 Encoding: UTF-8
 LazyData: true
 VignetteBuilder: knitr
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 LinkingTo: 
     Rcpp,
     RcppParallel,
