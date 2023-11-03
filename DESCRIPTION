@@ -10,7 +10,6 @@ Depends: R (>= 3.5.0)
 Imports: utils,
  DDD (>= 4.0),
  ape,
- apTreeshape,
   geiger,
    Rcpp,
  RcppParallel
