@@ -12,11 +12,17 @@ remotes::install_github("leonelhalsina/lemad")
 ```
 ### If installation gives you a hard time:
 It is likely that the latest Rtools needs to be installed.
-We recommend to have the latest R (it works perfectly with R 4.2.1).
+We recommend to have the latest R (it works perfectly with R 4.2.2, tested in both
+Windows 10 and Unix systems).
 Also, package rgal might cause issues.
 
+In some Unix systems, it might need the following line when installing the vignette:
+pandoc::pandoc_install()
+
 For MAC users, it is being reported that installing gfortran 11.2 could
-be useful. 
+be useful.
+
+DO NOT hesitate in contact me if none of this works: leonelhalsina@gmail.com
 
 
 ### Using Lemad
@@ -27,6 +33,8 @@ be called once you load the library:
 ```
 library(lemad)
 devtools::install(build_vignettes = TRUE)
+# or perhaps you need to build the vignette since package installation, so do:
+remotes::install_github("leonelhalsina/lemad",build_vignettes = TRUE)
 browseVignettes("lemad")
 ```
 ### Wiki
