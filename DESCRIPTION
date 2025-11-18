@@ -12,7 +12,7 @@ Imports: utils,
  ape,
   geiger,
    Rcpp,
- RcppParallel
+ RcppParallel  (== 5.1.9)
 Suggests: diversitree,
  phytools,
  testthat,
