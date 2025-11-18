@@ -4,15 +4,18 @@ This is LEMAD v2.1.1
 
 ### Install 
 
-To install the R package LEMAD, make sure you have devtools installed and then type from R (Rstudio):
+To install the R package LEMAD, make sure you have devtools installed. There is an issue with the latest RcppParallel package, so 
+I recomend to install an older, more stable version of it (5.1.9). During the installation of lemad, you might be
+asked to update RcppRparallel from 5.1.9 to the latest, please skip that update. In R (Rstudio) type:
 
 ```
 library(devtools)
+remotes::install_version("RcppParallel", version = "5.1.9")
 remotes::install_github("leonelhalsina/lemad")
 ```
 ### If installation gives you a hard time:
 It is likely that the latest Rtools needs to be installed.
-We recommend to have the latest R (it works perfectly with R 4.2.2, tested in both
+We recommend to have the latest R (it works perfectly with R 4.2.2 and 4.5.2, tested in both
 Windows 10 and Unix systems).
 Also, package rgal might cause issues.
 
